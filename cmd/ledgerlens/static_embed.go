@@ -18,7 +18,12 @@ import (
 //   installs an inline dev-banner handler. For the full interactive UI in
 //   dev, run `pnpm dev` in apps/web/.
 //
-//go:embed web_static
+// NOTE: the `all:` prefix is REQUIRED — without it, Go's `//go:embed`
+// excludes any directory or filename starting with `_` or `.`. Next.js
+// ships all its static assets under `_next/`, so without `all:` the CSS
+// and JS chunks 404 at runtime and the page renders unstyled.
+//
+//go:embed all:web_static
 var staticFS embed.FS
 
 // mountStatic registers a NoRoute handler that serves the embedded UI.
