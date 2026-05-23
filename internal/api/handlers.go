@@ -33,8 +33,10 @@ func (s *Server) RegisterRoutes(g *gin.RouterGroup) {
 	g.GET("/audit-bundles/:decisionId", s.getBundle)
 	g.GET("/health", s.health)
 
-	// Slice 1 (v2 Judge Request Mode)
+	// Slice 1 (v2 Judge Request Mode) — JSON blocking endpoint
 	g.POST("/deals/run", s.runDeal)
+	// Slice 2 — SSE streaming endpoint (same body, text/event-stream response)
+	g.POST("/deals/run-stream", s.runDealStream)
 }
 
 // CaseListItem is the JSON shape for GET /cases.

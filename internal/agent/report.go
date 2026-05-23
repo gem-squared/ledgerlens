@@ -51,8 +51,12 @@ func Compose(
 	case schemas.GateBlockedByTrustGate:
 		r.Headline = "Payment Blocked"
 		r.Result = fmt.Sprintf("LedgerLens BLOCKED the buyer agent from paying %s.", offer.SellerID)
-		r.Reason = decision.Reason
-		r.PaymentSummary = "No settlement issued. The buyer agent's funds are intact."
+		// Long-form reason that names the gap concretely (per David's directive).
+		r.Reason = fmt.Sprintf(
+			"The buyer asked for a provider under $%v/query, but the fetched public evidence did not prove the seller's per-query price. LedgerLens blocked the payment. Trust gate verdict: %s",
+			intent.MaxSpendUSDC, decision.Reason,
+		)
+		r.PaymentSummary = "No settlement issued. The buyer agent's funds are intact. A fast agent would have paid. LedgerLens waited."
 	case schemas.GateEscalatedToHuman:
 		r.Headline = "Escalated to Human"
 		r.Result = "Verdict in intermediate band — operator decision required before settlement."
