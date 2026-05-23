@@ -4,7 +4,7 @@
 //   - Bright Data evidence ingestion         (internal/brightdata, Unit 2)
 //   - GEM² Trust Gate L0/L1/L2 verification  (internal/trustgate,  Unit 3)
 //   - L3 release + x402 simulation           (internal/paymentgate, Unit 4)
-//   - HTTP API for the Next.js demo UI       (this file)
+//   - HTTP API for the Next.js demo UI       (internal/api, Unit 5)
 //
 // Settlement is x402 protocol SIMULATION only (v2.2 lock). No private keys,
 // no Coinbase account, no Base Sepolia dependency. The Settler interface in
@@ -17,6 +17,13 @@ import (
 	"net/http"
 	"os"
 
+	"github.com/gem-squared/ledgerlens/internal/api"
+	"github.com/gem-squared/ledgerlens/internal/paymentgate"
+	"github.com/gem-squared/ledgerlens/internal/trustgate/auditgate"
+	"github.com/gem-squared/ledgerlens/internal/trustgate/memory"
+	"github.com/gem-squared/ledgerlens/internal/trustgate/release"
+
+	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
 	_ "modernc.org/sqlite"
 )
@@ -30,11 +37,65 @@ func main() {
 	}
 	defer db.Close()
 
+	mem, err := memory.NewStore(db)
+	if err != nil {
+		log.Fatalf("ledgerlens: memory store: %v", err)
+	}
+
+	bundles, err := paymentgate.NewBundleStore("artifacts/audit_bundles")
+	if err != nil {
+		log.Fatalf("ledgerlens: bundle store: %v", err)
+	}
+
+	if err := os.MkdirAll("artifacts/fetch_receipts", 0o755); err != nil {
+		log.Fatalf("ledgerlens: fetch_receipts dir: %v", err)
+	}
+
+	orch := &paymentgate.Orchestrator{
+		Audit:   auditgate.NewClient(cfg.GEM2TPMNCheckerBaseURL, cfg.GEM2APIKey),
+		Settler: paymentgate.NewSimulatedSettler(),
+		Mem:     mem,
+		Bundles: bundles,
+		LLMKeys: auditgate.LLMKeySet{
+			Anthropic: cfg.AnthropicAPIKey,
+			Gemini:    cfg.GeminiAPIKey,
+			OpenAI:    cfg.OpenAIAPIKey,
+		},
+		Thresholds: release.DefaultThresholds(),
+	}
+
+	srv := &api.Server{
+		Orch:        orch,
+		BundlesDir:  "artifacts/audit_bundles",
+		EvidenceDir: "artifacts/fetch_receipts",
+		BundleStore: bundles,
+	}
+
 	r := gin.Default()
-	registerRoutes(r, db, cfg)
+
+	// CORS for the Next.js dev server (3001 + the dev-rewrite path).
+	r.Use(cors.New(cors.Config{
+		AllowOrigins:     []string{"http://localhost:3001", "http://127.0.0.1:3001", "http://localhost:3000"},
+		AllowMethods:     []string{"GET", "POST", "OPTIONS"},
+		AllowHeaders:     []string{"Content-Type", "Authorization"},
+		AllowCredentials: false,
+	}))
+
+	r.GET("/health", func(c *gin.Context) {
+		c.JSON(http.StatusOK, gin.H{
+			"status":                      "ok",
+			"service":                     "ledgerlens",
+			"settlement_mode":             cfg.SettlementMode,
+			"real_transaction_capability": false,
+		})
+	})
+
+	v1 := r.Group("/api/v1")
+	srv.RegisterRoutes(v1)
 
 	addr := cfg.Bind + ":" + cfg.Port
-	log.Printf("ledgerlens: listening on %s  (settlement=%s)", addr, cfg.SettlementMode)
+	log.Printf("ledgerlens: listening on %s  (settlement=%s, gem2_configured=%v)",
+		addr, cfg.SettlementMode, cfg.GEM2APIKey != "")
 	if err := r.Run(addr); err != nil {
 		log.Fatalf("ledgerlens: gin run: %v", err)
 	}
@@ -79,8 +140,6 @@ func envOr(key, def string) string {
 	return def
 }
 
-// ─── Storage ────────────────────────────────────────────────────────────────
-
 func openDB(path string) (*sql.DB, error) {
 	if err := os.MkdirAll(dir(path), 0o755); err != nil {
 		return nil, err
@@ -95,36 +154,4 @@ func dir(p string) string {
 		}
 	}
 	return "."
-}
-
-// ─── Routes ─────────────────────────────────────────────────────────────────
-
-func registerRoutes(r *gin.Engine, _ *sql.DB, cfg Config) {
-	r.GET("/health", func(c *gin.Context) {
-		c.JSON(http.StatusOK, gin.H{
-			"status":          "ok",
-			"service":         "ledgerlens",
-			"settlement_mode": cfg.SettlementMode,
-			"real_transaction_capability": false,
-		})
-	})
-
-	// API v1 — endpoints land in Units 2 / 3 / 4. Stubs respond 501 so the
-	// frontend can wire against them.
-	api := r.Group("/api/v1")
-	api.POST("/requests", notImplemented("Unit 4: POST /requests"))
-	api.GET("/decisions/:id", notImplemented("Unit 4: GET /decisions/:id"))
-	api.GET("/audit-bundles/:id", notImplemented("Unit 4: GET /audit-bundles/:id"))
-	api.GET("/offers", notImplemented("Unit 3: GET /offers"))
-	api.POST("/offers", notImplemented("Unit 3: POST /offers"))
-}
-
-func notImplemented(label string) gin.HandlerFunc {
-	return func(c *gin.Context) {
-		c.JSON(http.StatusNotImplemented, gin.H{
-			"error": "not_implemented",
-			"label": label,
-			"note":  "scaffolded in Unit 1; implementation belongs to a later unit",
-		})
-	}
 }
