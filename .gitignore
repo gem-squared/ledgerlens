@@ -70,3 +70,16 @@ storage/*.db-shm
 
 # === Generated TS types (regenerate via `make schemas`) ===
 packages/contracts-ts/types.ts
+
+# === Embedded web static — build artifacts from `make web-export` ===
+# Only .gitkeep is committed. `make web-export` populates the rest before
+# `go build`. Dev builds without that step show an inline dev-banner page
+# (cmd/ledgerlens/static_embed.go devBannerHandler).
+cmd/ledgerlens/web_static/*
+!cmd/ledgerlens/web_static/.gitkeep
+
+# Next.js export staging
+apps/web/out/
+
+# Built binaries
+bin/

@@ -1,4 +1,4 @@
-.PHONY: help schemas tidy build run web-install web-dev web-build clean preflight
+.PHONY: help schemas tidy build run web-install web-dev web-build web-export build-prod build-linux clean preflight
 
 help:
 	@echo "LedgerLens — make targets"
@@ -41,6 +41,28 @@ web-dev:
 
 web-build:
 	cd apps/web && pnpm build
+
+web-export:
+	@echo "==> exporting Next.js to apps/web/out/ (static)"
+	cd apps/web && NEXT_OUTPUT_MODE=export pnpm build
+	@echo "==> syncing apps/web/out/ → cmd/ledgerlens/web_static/"
+	@# Overlay copy: do NOT rm -rf cmd/ledgerlens/web_static (it holds the committed
+	@# placeholder index.html so `go build` works without first running the export).
+	@# The cp -R overwrites index.html + adds _next/, 404.html, etc. Those build
+	@# artifacts are gitignored.
+	mkdir -p cmd/ledgerlens/web_static
+	cp -R apps/web/out/. cmd/ledgerlens/web_static/
+
+build-prod: web-export
+	@echo "==> go build (darwin/host) → bin/ledgerlens"
+	mkdir -p bin
+	go build -trimpath -ldflags="-s -w" -o bin/ledgerlens ./cmd/ledgerlens
+
+build-linux: web-export
+	@echo "==> cross-compile linux/amd64 → bin/ledgerlens-linux"
+	mkdir -p bin
+	GOOS=linux GOARCH=amd64 CGO_ENABLED=0 go build -trimpath -ldflags="-s -w" -o bin/ledgerlens-linux ./cmd/ledgerlens
+	@ls -la bin/ledgerlens-linux
 
 clean:
 	rm -rf bin/ dist/ apps/web/.next apps/web/out

@@ -93,6 +93,10 @@ func main() {
 	v1 := r.Group("/api/v1")
 	srv.RegisterRoutes(v1)
 
+	// Serve embedded Next.js static export at /. Wired last so /api/* and
+	// /health take precedence. See cmd/ledgerlens/static_embed.go.
+	mountStatic(r)
+
 	addr := cfg.Bind + ":" + cfg.Port
 	log.Printf("ledgerlens: listening on %s  (settlement=%s, gem2_configured=%v)",
 		addr, cfg.SettlementMode, cfg.GEM2APIKey != "")
