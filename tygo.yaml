@@ -1,0 +1,8 @@
+packages:
+  - path: "github.com/gem-squared/ledgerlens/internal/schemas"
+    output_path: "packages/contracts-ts/types.ts"
+    include_files:
+      - "types.go"
+    type_mappings:
+      "time.Time": "string"
+      "context.Context": "never"
