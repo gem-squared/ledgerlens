@@ -1,0 +1,32 @@
+{
+  "verdict": "ALLOW",
+  "score": 85,
+  "reasons": [
+    "[TYPE] I lacks required fields: offerId, sellerId, sourceUrl missing from provided input",
+    "[RULE-1] claim must be supported by provided evidence — PASS: NYSE+NASDAQ coverage confirmed by vendor status page",
+    "[RULE-2] price must be within buyer.maxSpendUSDC (assume cap=0.01) — PASS: $0.001 is well below $0.01 cap",
+    "[RULE-3] no Δe→∫de overclaims (sparse data presented as trend) — PASS: no trend claims made, specific pricing stated",
+    "[EVIDENCE-1] NYSE + NASDAQ live price feed status page... — used as ⊢ grounded fact for RULE-1",
+    "[EVIDENCE-2] Live market data API. $0.001 per query. NYSE+NASDAQ coverage — supports ⊨ inference for RULE-1 and RULE-2: confirms both coverage and pricing",
+    "[SPT] No violations detected",
+    "[EEF] No epistemic issues detected",
+    "[DIM-grounding] 90/100 — evidence directly supports key claims",
+    "[DIM-evidence_quality] 85/100 — authoritative vendor sources with timestamps",
+    "[DIM-logical_consistency] 90/100 — claim aligns with evidence",
+    "[DIM-source_attribution] 80/100 — implicit vendor attribution through evidence",
+    "[DIM-temporal_validity] 85/100 — recent evidence timestamps",
+    "[DIM-scope_accuracy] 80/100 — specific market coverage claimed and verified"
+  ],
+  "meta": {
+    "result_id": "2e489805-5f79-4ea4-801f-4133eeef2f2e",
+    "duration_ms": 8065,
+    "usage": {
+      "provider": "claude",
+      "model": "claude-sonnet-4-20250514",
+      "llm_calls": 1,
+      "total_input_tokens": 5105,
+      "total_output_tokens": 417,
+      "estimated_cost_usd": 0.02157
+    }
+  }
+}

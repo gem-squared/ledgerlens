@@ -1,0 +1,30 @@
+{
+  "verdict": "SUCCESS",
+  "score": 85,
+  "reasons": [
+    "[TYPE] O structurally matches DecisionPacket schema — all required fields present with correct types",
+    "[RULE-1] decisionPacket.verdict must be APPROVED_BY_TRUST_GATE | BLOCKED_BY_TRUST_GATE | ESCALATED_TO_HUMAN — PASS: verdict='APPROVED_BY_TRUST_GATE' matches allowed enum",
+    "[RULE-2] paymentAllowed = true iff verdict = APPROVED_BY_TRUST_GATE — PASS: paymentAllowed=true and verdict=APPROVED_BY_TRUST_GATE satisfy biconditional",
+    "[RULE-3] reason field must reference grounded evidence — PASS: reason='claim grounded by NYSE+NASDAQ status page' references evidence chunk 1",
+    "[EVIDENCE-1] NYSE + NASDAQ live price feed status page. Last update: 2026-05-23 10:59:53 UTC — used as ⊢ grounded fact for RULE-3",
+    "[EVIDENCE-2] Google search result showing example-vendor pricing page — ⊨ inference: supports vendor legitimacy context but not directly cited in reason field",
+    "[DIM-grounding] 90/100 — reason explicitly references NYSE+NASDAQ evidence",
+    "[DIM-evidence] 85/100 — authoritative market data source with recent timestamp",
+    "[DIM-consistency] 90/100 — verdict, paymentAllowed, and reason align logically",
+    "[DIM-attribution] 80/100 — evidence source identified but could be more specific",
+    "[DIM-temporal] 85/100 — evidence timestamp within reasonable freshness window",
+    "[DIM-scope] 80/100 — reason scope matches decision scope appropriately"
+  ],
+  "meta": {
+    "result_id": "a4db705e-a8a7-4f16-9cb2-5fb0c3e95f35",
+    "duration_ms": 8433,
+    "usage": {
+      "provider": "claude",
+      "model": "claude-sonnet-4-20250514",
+      "llm_calls": 1,
+      "total_input_tokens": 5055,
+      "total_output_tokens": 454,
+      "estimated_cost_usd": 0.021975
+    }
+  }
+}
