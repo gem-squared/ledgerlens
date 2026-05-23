@@ -7,6 +7,7 @@ import (
 	"path/filepath"
 	"time"
 
+	"github.com/gem-squared/ledgerlens/internal/brightdata"
 	"github.com/gem-squared/ledgerlens/internal/paymentgate"
 	"github.com/gem-squared/ledgerlens/internal/schemas"
 	"github.com/gem-squared/ledgerlens/internal/trustgate/auditgate"
@@ -16,10 +17,13 @@ import (
 
 // Server holds the dependencies the demo HTTP API needs.
 type Server struct {
-	Orch          *paymentgate.Orchestrator
-	BundlesDir    string                 // artifacts/audit_bundles
-	EvidenceDir   string                 // artifacts/fetch_receipts
-	BundleStore   *paymentgate.BundleStore
+	Orch            *paymentgate.Orchestrator
+	BundlesDir      string                       // artifacts/audit_bundles
+	EvidenceDir     string                       // artifacts/fetch_receipts
+	BundleStore     *paymentgate.BundleStore
+	SERP            *brightdata.SERPClient       // Slice 1 (Judge Request Mode) — live SERP search
+	Unlocker        *brightdata.UnlockerClient   // Slice 1 — live Unlocker fetch
+	AnthropicAPIKey string                       // Slice 1 — intent + offer synthesis LLM calls
 }
 
 // RegisterRoutes wires the API onto a gin engine.
@@ -28,6 +32,9 @@ func (s *Server) RegisterRoutes(g *gin.RouterGroup) {
 	g.POST("/cases/:id/run", s.runCase)
 	g.GET("/audit-bundles/:decisionId", s.getBundle)
 	g.GET("/health", s.health)
+
+	// Slice 1 (v2 Judge Request Mode)
+	g.POST("/deals/run", s.runDeal)
 }
 
 // CaseListItem is the JSON shape for GET /cases.

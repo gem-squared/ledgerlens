@@ -18,6 +18,7 @@ import (
 	"os"
 
 	"github.com/gem-squared/ledgerlens/internal/api"
+	"github.com/gem-squared/ledgerlens/internal/brightdata"
 	"github.com/gem-squared/ledgerlens/internal/paymentgate"
 	"github.com/gem-squared/ledgerlens/internal/trustgate/auditgate"
 	"github.com/gem-squared/ledgerlens/internal/trustgate/memory"
@@ -64,11 +65,32 @@ func main() {
 		Thresholds: release.DefaultThresholds(),
 	}
 
+	// Slice-1 (Judge Request Mode) — Bright Data live wrappers for the
+	// agent pipeline. Reuses the fetch_receipts/ store that orchestrator
+	// also writes to.
+	var serpClient *brightdata.SERPClient
+	var unlockerClient *brightdata.UnlockerClient
+	if cfg.BrightDataAPIToken != "" {
+		bdStore, err := brightdata.NewReceiptStore("artifacts/fetch_receipts")
+		if err != nil {
+			log.Fatalf("ledgerlens: brightdata receipt store: %v", err)
+		}
+		if z := os.Getenv("BRIGHTDATA_SERP_ZONE"); z != "" {
+			serpClient = brightdata.NewSERPClient(cfg.BrightDataAPIToken, z, bdStore)
+		}
+		if z := os.Getenv("BRIGHTDATA_UNLOCKER_ZONE"); z != "" {
+			unlockerClient = brightdata.NewUnlockerClient(cfg.BrightDataAPIToken, z, bdStore)
+		}
+	}
+
 	srv := &api.Server{
-		Orch:        orch,
-		BundlesDir:  "artifacts/audit_bundles",
-		EvidenceDir: "artifacts/fetch_receipts",
-		BundleStore: bundles,
+		Orch:            orch,
+		BundlesDir:      "artifacts/audit_bundles",
+		EvidenceDir:     "artifacts/fetch_receipts",
+		BundleStore:     bundles,
+		SERP:            serpClient,
+		Unlocker:        unlockerClient,
+		AnthropicAPIKey: cfg.AnthropicAPIKey,
 	}
 
 	r := gin.Default()

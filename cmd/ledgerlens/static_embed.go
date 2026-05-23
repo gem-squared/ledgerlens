@@ -48,6 +48,15 @@ func mountStatic(r *gin.Engine) {
 			c.AbortWithStatus(http.StatusMethodNotAllowed)
 			return
 		}
+		// Force browsers to revalidate on every request — relevant while the
+		// hackathon UI is in active flux. Production-ready setting in §X
+		// would distinguish content-hashed /_next/static/* (immutable, long
+		// max-age) from index.html (no-cache). For now: blanket no-store
+		// keeps demos honest after every redeploy.
+		c.Writer.Header().Set("Cache-Control", "no-store, max-age=0, must-revalidate")
+		c.Writer.Header().Set("Pragma", "no-cache")
+		c.Writer.Header().Set("Expires", "0")
+
 		path := req.URL.Path
 		if path == "/" {
 			path = "/index.html"
