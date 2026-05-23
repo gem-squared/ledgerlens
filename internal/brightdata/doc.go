@@ -1,13 +1,14 @@
-// Package brightdata wraps Bright Data products (SERP, Web Unlocker, Browser
-// API, MCP Server, optional Web Scraper API) into a single Go interface that
-// emits canonical EvidenceReceipt records.
+// Package brightdata wraps Bright Data products into Go interfaces that emit
+// canonical schemas.EvidenceReceipt records into artifacts/fetch_receipts/.
 //
-// Implementation lands in Unit 2 of WP-ST-1. This file exists in Unit 1 so the
-// package compiles and so that github.com/mark3labs/mcp-go is anchored in the
-// module's dependency graph for the MCP client work that follows.
+// Four products are wrapped:
+//
+//	SERP API           gem2_serp_api1        → serp.Search
+//	Web Unlocker       gem2_web_unlocker1    → unlocker.Fetch
+//	Scraping Browser   gem2_scraping_browser1 → browser.FetchPage
+//	MCP Server         npx @brightdata/mcp-server → mcp_client.SmokeListTools
+//
+// All page fetches pass through aup.IsPublicAllowed first — login-required,
+// admin, and other nonpublic paths are blocked at the Go layer regardless of
+// what Bright Data would permit. This is the AUP-aware source policy.
 package brightdata
-
-import (
-	// Anchored for Unit 2 — internal/brightdata/mcp_client.go will use this.
-	_ "github.com/mark3labs/mcp-go/mcp"
-)
