@@ -57,3 +57,65 @@ export type {
   SimulatedSettlement,
   ClaimAssessment,
 };
+
+// ─── Slice 1/2: Judge Request Mode types ──────────────────────────────────
+
+export interface BuyerIntent {
+  offDomain: boolean;
+  politeReject?: string;
+  dataNeed?: string;
+  freshness?: string;
+  maxSpendUSDC?: number;
+  policyRequirements?: string[];
+  searchTerms?: string[];
+}
+
+export interface FinalReport {
+  headline: string;
+  request: string;
+  result: string;
+  reason: string;
+  evidenceSummary: string;
+  paymentSummary: string;
+  auditBundleRef: string;
+  tagline: string;
+}
+
+export interface DealRunResult {
+  mode: string;
+  judgeRequest: string;
+  buyerIntent: BuyerIntent;
+  agentNarrative: string[];
+  evidenceReceipts: EvidenceReceipt[];
+  sellerOffer: SellerOffer;
+  decision: DecisionPacket;
+  settlement: SimulatedSettlement;
+  l1?: GateResponse;
+  l2?: GateResponse;
+  bundlePath: string;
+  finalReport: FinalReport;
+  durationMs: number;
+}
+
+// ─── Slice 2: SSE step events ──────────────────────────────────────────────
+
+export type StepStatus =
+  | 'idle'
+  | 'running'
+  | 'passed'
+  | 'blocked'
+  | 'failed'
+  | 'skipped'
+  | 'settled'
+  | 'rejected'
+  | 'escalated';
+
+export interface StepEvent {
+  step: string;
+  status: StepStatus;
+  label: string;
+  detail?: unknown;
+  ts: string;
+}
+
+export type RunMode = 'live' | 'prewarmed' | 'replay';

@@ -1,34 +1,35 @@
+import { HeroSection } from './components/HeroSection';
+import { JudgeRequestConsole } from './components/JudgeRequestConsole';
 import { CaseRunner } from './components/CaseRunner';
 
 export default function Home() {
   return (
     <main className="mx-auto max-w-6xl px-6 py-10">
-      <header className="mb-8 flex flex-wrap items-end justify-between gap-4">
-        <div>
-          <span className="inline-block rounded-full bg-simBadge px-3 py-1 text-xs font-semibold uppercase tracking-wider text-white">
-            Simulation Mode
-          </span>
-          <h1 className="mt-3 text-4xl font-bold tracking-tight">LedgerLens</h1>
-          <p className="mt-1 text-lg text-zinc-400">No grounded claim, no payment.</p>
-          <p className="mt-3 max-w-3xl text-sm text-zinc-400">
-            x402-native Agent-to-Agent Payments with a Bright Data web-evidence layer and a GEM² Trust Gate before settlement.{' '}
-            <span className="italic">We simulate settlement, but the trust gate is real.</span>
-          </p>
-        </div>
-        <a
-          href="https://github.com/gem-squared/ledgerlens"
-          className="rounded-md border border-zinc-700 px-3 py-1.5 text-xs text-zinc-400 transition hover:border-zinc-500 hover:text-zinc-200"
-        >
-          source ↗
-        </a>
-      </header>
+      <HeroSection />
 
-      <CaseRunner />
+      {/* Primary demo surface: Judge Request Mode (Slice 1/2) */}
+      <JudgeRequestConsole />
+
+      {/* Deterministic replay (former Case A / Case B — Unit 5) */}
+      <section className="mt-14 border-t border-zinc-800 pt-8">
+        <h2 className="text-base font-semibold uppercase tracking-wider text-zinc-300">
+          Deterministic Replay
+        </h2>
+        <p className="mt-1 max-w-3xl text-sm text-zinc-500">
+          Canonical scripted scenarios. Use these when you want a fixed
+          BLOCKED / APPROVED outcome (no live web variance) — useful as a demo
+          safety net if the live audit gate is slow or unreachable.
+        </p>
+        <div className="mt-5">
+          <CaseRunner />
+        </div>
+      </section>
 
       <footer className="mt-12 border-t border-zinc-800 pt-6 text-xs text-zinc-500">
-        Built for the Bright Data &quot;Web Data UNLOCKED&quot; Hackathon. Backend on{' '}
-        <code>127.0.0.1:8082</code> via Next.js rewrite at <code>/api/*</code>. L1 / L2 audit by{' '}
-        <code>gem2-tpmn-checker.fly.dev</code>.
+        Built for the Bright Data &quot;Web Data UNLOCKED&quot; Hackathon. Three modes:{' '}
+        <strong>LIVE</strong> 20–45s · <strong>PRE-WARMED</strong> 5–8s · <strong>REPLAY</strong> instant.
+        Backend on <code>127.0.0.1:8082</code> (dev) or embedded single-binary on the VPS.
+        L1 / L2 audit by <code>gem2-tpmn-checker.fly.dev</code>.
       </footer>
     </main>
   );
