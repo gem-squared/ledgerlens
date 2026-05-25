@@ -10,8 +10,10 @@ Confidential-data/
 .gem-squared/
 CLAUDE.md
 
-# === Operational secrets (legacy — Docs/DEPLOY.md moved to Confidential-data/) ===
-Docs/DEPLOY.md
+# === Docs — local-only working notes, pitch deck, integration docs, etc. ===
+# Strategy / pitch / demo-script / judge-guide / legal notices live in Docs/
+# but stay off the public repo (per david@gineers.ai, 2026-05-25).
+Docs/
 
 # === OS / editor ===
 .DS_Store
