@@ -73,7 +73,6 @@ export function RecentActivity({ refreshTrigger, initialLimit = 5 }: RecentActiv
                   <th className="px-2 py-1 text-left">Query</th>
                   <th className="px-2 py-1 text-right">Dur</th>
                   <th className="px-2 py-1 text-right">Audit</th>
-                  <th className="px-2 py-1 text-right">Bundle</th>
                 </tr>
               </thead>
               <tbody>
@@ -115,7 +114,19 @@ function Row({ bundle, onView }: { bundle: BundleSummary; onView: () => void }) 
       ? `${bundle.l1Score} / —`
       : `${bundle.l1Score} / ${bundle.l2Score}`;
   return (
-    <tr className="border-t border-zinc-800 hover:bg-zinc-900/60">
+    <tr
+      onClick={onView}
+      onKeyDown={(e) => {
+        if (e.key === 'Enter' || e.key === ' ') {
+          e.preventDefault();
+          onView();
+        }
+      }}
+      tabIndex={0}
+      role="button"
+      aria-label={`View audit bundle for ${bundle.query || 'untitled run'}`}
+      className="cursor-pointer border-t border-zinc-800 transition hover:bg-zinc-900/60 focus:bg-zinc-900/60 focus:outline-none focus-visible:ring-1 focus-visible:ring-zinc-600"
+    >
       <td className="px-2 py-2 align-top text-zinc-400">
         {formatRelative(bundle.createdAt)}
       </td>
@@ -134,15 +145,6 @@ function Row({ bundle, onView }: { bundle: BundleSummary; onView: () => void }) 
         {(bundle.durationMs / 1000).toFixed(1)}s
       </td>
       <td className="px-2 py-2 text-right align-top font-mono text-zinc-400">{auditScore}</td>
-      <td className="px-2 py-2 text-right align-top">
-        <button
-          type="button"
-          onClick={onView}
-          className="rounded border border-zinc-700 px-2 py-0.5 text-[10px] text-zinc-300 hover:border-zinc-500"
-        >
-          View
-        </button>
-      </td>
     </tr>
   );
 }
