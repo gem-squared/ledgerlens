@@ -1,11 +1,16 @@
 # LedgerLens — .gitignore
 
+# === Confidential data — local ONLY, never push ===
+# Canonical location for all secrets (.env, DEPLOY.md with VPS IP/SSH, etc.).
+# The root `.env` is a symlink → Confidential-data/.env; both are ignored.
+Confidential-data/
+
 # === Session-level / TPMN governance — NEVER include in public repo ===
 .claude/
 .gem-squared/
 CLAUDE.md
 
-# === Operational secrets (VPS topology, SSH keys, etc.) ===
+# === Operational secrets (legacy — Docs/DEPLOY.md moved to Confidential-data/) ===
 Docs/DEPLOY.md
 
 # === OS / editor ===
