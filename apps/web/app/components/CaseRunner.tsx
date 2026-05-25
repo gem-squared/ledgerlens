@@ -2,17 +2,13 @@
 
 import { useEffect, useState } from 'react';
 import { listCases, runCase } from '@/lib/api';
-import type { CaseListItem, RunResult } from '@/lib/types';
-import { DecisionBanner } from './DecisionBanner';
-import { ClaimAssessmentTable } from './ClaimAssessmentTable';
-import { SettlementCard } from './SettlementCard';
-import { EvidenceList } from './EvidenceList';
-import { ReasonChain } from './ReasonChain';
+import type { CaseListItem, DealRunResult } from '@/lib/types';
+import { RichRunResult } from './RichRunResult';
 
 export function CaseRunner() {
   const [cases, setCases] = useState<CaseListItem[]>([]);
   const [running, setRunning] = useState<string | null>(null);
-  const [result, setResult] = useState<RunResult | null>(null);
+  const [result, setResult] = useState<DealRunResult | null>(null);
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
@@ -65,41 +61,7 @@ export function CaseRunner() {
         </div>
       )}
 
-      {result && (
-        <section className="space-y-6">
-          <DecisionBanner decision={result.decision} />
-
-          <div className="grid gap-6 lg:grid-cols-2">
-            <div className="space-y-4">
-              <div>
-                <h3 className="mb-2 text-xs font-semibold uppercase tracking-wider text-zinc-400">
-                  Bright Data Evidence ({result.evidenceReceipts?.length ?? 0} receipts)
-                </h3>
-                <EvidenceList receipts={result.evidenceReceipts} />
-              </div>
-              <SettlementCard settlement={result.settlement} />
-            </div>
-
-            <div className="space-y-4">
-              <ReasonChain title="L1 P-check (gem2-tpmn-checker)" response={result.l1} />
-              {result.l2 && <ReasonChain title="L2 O-check (gem2-tpmn-checker)" response={result.l2} />}
-            </div>
-          </div>
-
-          <div>
-            <h3 className="mb-2 text-xs font-semibold uppercase tracking-wider text-zinc-400">
-              Claim Assessments — canonical EEF (⊢ grounded · ⊨ inferred · ⊬ extrapolated · ⊥ unknown)
-            </h3>
-            <ClaimAssessmentTable claims={result.decision?.claimAssessments ?? []} />
-          </div>
-
-          <div className="flex flex-wrap gap-x-6 gap-y-1 text-xs text-zinc-500">
-            <span>case: <code>{result.case?.id}</code></span>
-            <span>duration: {result.durationMs} ms</span>
-            <span>bundle: <code className="break-all">{result.bundlePath}</code></span>
-          </div>
-        </section>
-      )}
+      {result && <RichRunResult result={result} />}
     </div>
   );
 }
