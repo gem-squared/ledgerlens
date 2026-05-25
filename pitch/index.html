@@ -1,0 +1,663 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=1920, initial-scale=1">
+<title>LedgerLens × Bright Data — No grounded claim, no payment.</title>
+<style>
+  :root {
+    --bg-a: #050714;
+    --bg-b: #0f0e2a;
+    --bg-c: #1e1b4b;
+    --accent: #6366f1;          /* indigo-500 — simBadge */
+    --accent-bright: #a5b4fc;   /* indigo-300 */
+    --bd-blue: #4d6cfa;         /* Bright Data wordmark */
+    --gold: #facc15;
+    --green: #10b981;
+    --red: #ef4444;
+    --text: #ffffff;
+    --text-dim: #94a3b8;
+    --text-soft: #cbd5e1;
+    --border: rgba(148,163,184,0.18);
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html, body { width: 100%; height: 100%; overflow: hidden; }
+  body {
+    background: #000;
+    color: var(--text);
+    font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  }
+
+  /* Stage — each slide 1920×1080, scaled to viewport */
+  .deck { width: 100vw; height: 100vh; position: relative; overflow: hidden; }
+  .slide {
+    position: absolute; inset: 0;
+    width: 1920px; height: 1080px;
+    transform-origin: top left;
+    background:
+      radial-gradient(ellipse at 22% 28%, rgba(99,102,241,0.14) 0%, transparent 50%),
+      radial-gradient(ellipse at 78% 72%, rgba(165,180,252,0.10) 0%, transparent 50%),
+      linear-gradient(135deg, var(--bg-a) 0%, var(--bg-b) 50%, var(--bg-c) 100%);
+    color: var(--text);
+    padding: 80px 120px;
+    display: none;
+    flex-direction: column;
+  }
+  .slide.active { display: flex; }
+  .edge-glow {
+    position: absolute; inset: 0;
+    box-shadow: inset 0 0 240px rgba(0,0,0,0.55);
+    pointer-events: none;
+  }
+  .watermark {
+    position: absolute; inset: 0;
+    display: flex; align-items: center; justify-content: center;
+    font-family: ui-monospace, "JetBrains Mono", monospace;
+    font-size: 540px;
+    color: rgba(99,102,241,0.030);
+    letter-spacing: -10px;
+    user-select: none; pointer-events: none;
+    line-height: 1; font-weight: 700;
+  }
+  .watermark.eef {
+    font-size: 380px;
+    letter-spacing: 60px;
+    color: rgba(165,180,252,0.045);
+  }
+
+  /* Header band */
+  .head {
+    display: flex; justify-content: space-between; align-items: center;
+    margin-bottom: 60px;
+    position: relative; z-index: 5;
+  }
+  .brand {
+    display: inline-flex; align-items: center; gap: 16px;
+    font-size: 32px; font-weight: 800; letter-spacing: -0.5px;
+  }
+  .brand .accent { color: var(--accent); font-weight: 400; font-size: 28px; }
+  .brand img.bd-logo {
+    height: 30px; width: auto;
+    display: inline-block;
+    transform: translateY(2px);
+  }
+  .meta {
+    font-family: ui-monospace, monospace;
+    font-size: 20px;
+    color: var(--text-dim);
+    letter-spacing: 1px;
+  }
+
+  /* Titles */
+  .eyebrow {
+    font-size: 28px;
+    color: var(--accent-bright);
+    text-transform: uppercase;
+    letter-spacing: 6px;
+    font-weight: 700;
+    margin-bottom: 28px;
+    position: relative; z-index: 5;
+  }
+  .title {
+    font-size: 128px;
+    font-weight: 800;
+    letter-spacing: -3px;
+    line-height: 1.04;
+    margin-bottom: 56px;
+    position: relative; z-index: 5;
+  }
+  .title.smaller { font-size: 96px; }
+  .title.tighter { margin-bottom: 36px; }
+  .title .accent { color: var(--accent); }
+  .title .bright { color: var(--accent-bright); }
+  .title .gold   { color: var(--gold); }
+  .title .green  { color: var(--green); }
+  .title .red    { color: var(--red); }
+  .title .gray   { color: var(--text-dim); }
+  .title em      { color: var(--accent); font-style: italic; }
+
+  /* Bullets */
+  ul.points {
+    list-style: none; padding: 0;
+    position: relative; z-index: 5;
+    margin-top: 12px;
+  }
+  ul.points li {
+    font-size: 40px;
+    font-weight: 600;
+    line-height: 1.35;
+    padding: 22px 0 22px 64px;
+    position: relative;
+    color: var(--text-soft);
+    border-bottom: 1px solid rgba(99,102,241,0.16);
+  }
+  ul.points li:last-child { border-bottom: none; }
+  ul.points li::before {
+    content: "";
+    position: absolute;
+    left: 0; top: 50%;
+    transform: translateY(-50%);
+    width: 32px; height: 4px;
+    background: var(--accent);
+    border-radius: 2px;
+    box-shadow: 0 0 16px rgba(99,102,241,0.6);
+  }
+  ul.points li strong, ul.points li b {
+    color: var(--text);
+    font-weight: 800;
+  }
+  ul.points li em {
+    color: var(--accent-bright);
+    font-style: normal;
+    font-weight: 800;
+  }
+  ul.points li code {
+    font-family: ui-monospace, "JetBrains Mono", monospace;
+    color: var(--accent-bright);
+    background: rgba(99,102,241,0.12);
+    border: 1px solid rgba(99,102,241,0.34);
+    padding: 4px 14px;
+    border-radius: 8px;
+    font-size: 0.84em;
+    font-weight: 700;
+    letter-spacing: 1px;
+  }
+
+  /* Footer band */
+  .foot {
+    position: absolute;
+    bottom: 50px; left: 120px; right: 120px;
+    display: flex; justify-content: space-between; align-items: center;
+    font-size: 20px;
+    color: var(--text-dim);
+    z-index: 5;
+  }
+  .foot .live {
+    font-family: ui-monospace, monospace;
+    color: var(--accent-bright);
+    display: inline-flex; align-items: center; gap: 12px;
+    font-weight: 600;
+  }
+  .foot .pulse {
+    width: 12px; height: 12px;
+    background: var(--green); border-radius: 50%;
+    box-shadow: 0 0 12px var(--green);
+    animation: ll-pulse-dot 1.8s ease-in-out infinite;
+  }
+  @keyframes ll-pulse-dot {
+    0%, 100% { opacity: 1; }
+    50%      { opacity: 0.35; }
+  }
+  .foot .right b { color: var(--text); font-weight: 700; }
+
+  /* Body utility */
+  .body { flex: 1; position: relative; z-index: 5; }
+
+  /* Slide 7 (Proof) — three big stat columns */
+  .stats-row {
+    display: flex; justify-content: space-around; align-items: stretch;
+    margin: 48px 0 36px;
+    position: relative; z-index: 5;
+  }
+  .stat {
+    flex: 1; text-align: center;
+    padding: 18px 16px;
+    border-right: 1px solid rgba(148,163,184,0.18);
+  }
+  .stat:last-child { border-right: none; }
+  .stat .n {
+    font-size: 200px;
+    font-weight: 800;
+    letter-spacing: -6px;
+    line-height: 0.95;
+  }
+  .stat .n.approved { color: var(--green);  text-shadow: 0 0 56px rgba(16,185,129,0.45); }
+  .stat .n.blocked  { color: var(--red);    text-shadow: 0 0 56px rgba(239,68,68,0.40); }
+  .stat .n.deals    { color: var(--accent); text-shadow: 0 0 56px rgba(99,102,241,0.50); }
+  .stat .l {
+    font-family: ui-monospace, monospace;
+    color: var(--text-dim);
+    text-transform: uppercase;
+    letter-spacing: 5px;
+    font-size: 24px;
+    margin-top: 14px;
+  }
+
+  /* Slide 5 (Gate) — EEF tag centerpiece */
+  .eef-hero {
+    text-align: center;
+    margin: 48px 0 28px;
+    position: relative; z-index: 5;
+  }
+  .eef-hero .row {
+    display: inline-flex; gap: 56px; align-items: baseline;
+  }
+  .eef-hero .tag {
+    font-family: ui-monospace, "JetBrains Mono", monospace;
+    font-size: 132px;
+    font-weight: 800;
+    line-height: 1;
+  }
+  .eef-hero .tag.g  { color: var(--green);         text-shadow: 0 0 56px rgba(16,185,129,0.45); }
+  .eef-hero .tag.i  { color: var(--accent-bright); text-shadow: 0 0 48px rgba(165,180,252,0.45); }
+  .eef-hero .tag.e  { color: var(--gold);          text-shadow: 0 0 48px rgba(250,204,21,0.38); }
+  .eef-hero .tag.u  { color: var(--text-dim);      opacity: 0.85; }
+  .eef-hero .legend {
+    font-family: ui-monospace, monospace;
+    font-size: 22px;
+    color: var(--text-dim);
+    letter-spacing: 2px;
+    margin-top: 24px;
+  }
+  .eef-hero .legend b { color: var(--text); font-weight: 700; margin-right: 6px; }
+  .eef-hero .legend .sep { color: rgba(148,163,184,0.4); margin: 0 18px; }
+
+  /* Slide 3 (Pipeline) — flow chips */
+  .pipeline {
+    display: flex; flex-wrap: wrap; justify-content: center; align-items: center;
+    gap: 14px;
+    margin: 36px 0 28px;
+    position: relative; z-index: 5;
+  }
+  .pipeline .chip {
+    font-family: ui-monospace, monospace;
+    font-size: 26px;
+    font-weight: 700;
+    padding: 14px 22px;
+    border: 1px solid rgba(99,102,241,0.42);
+    background: rgba(99,102,241,0.10);
+    border-radius: 12px;
+    color: var(--text);
+    letter-spacing: 1px;
+    box-shadow: 0 0 24px rgba(99,102,241,0.18);
+  }
+  .pipeline .arrow {
+    color: var(--accent-bright);
+    font-size: 30px;
+    font-weight: 800;
+  }
+
+  /* Slide 9 (Ask) — huge centered URL */
+  .ask-wrap {
+    flex: 1;
+    display: flex; flex-direction: column;
+    justify-content: center; align-items: center;
+    text-align: center;
+    position: relative; z-index: 5;
+  }
+  .ask-wrap .url {
+    font-family: ui-monospace, monospace;
+    font-size: 60px;
+    color: var(--accent-bright);
+    background: rgba(99,102,241,0.10);
+    border: 2px solid rgba(99,102,241,0.42);
+    padding: 24px 48px;
+    border-radius: 16px;
+    text-shadow: 0 0 32px rgba(99,102,241,0.6);
+    margin: 36px 0 44px;
+  }
+  .ask-wrap .points { max-width: 1500px; margin: 16px auto 0; }
+  .ask-wrap .points li { padding-left: 56px; }
+
+  /* Slide 8 (Tracks) — three labeled columns */
+  .tracks {
+    display: flex; gap: 32px;
+    margin: 40px 0 24px;
+    position: relative; z-index: 5;
+  }
+  .track {
+    flex: 1;
+    border: 1px solid var(--border);
+    background: rgba(15,14,42,0.5);
+    border-radius: 18px;
+    padding: 28px 28px 32px;
+    backdrop-filter: blur(2px);
+  }
+  .track .lbl {
+    font-family: ui-monospace, monospace;
+    font-size: 18px;
+    letter-spacing: 4px;
+    text-transform: uppercase;
+    color: var(--text-dim);
+    margin-bottom: 12px;
+  }
+  .track h3 {
+    font-size: 42px;
+    font-weight: 800;
+    letter-spacing: -1px;
+    line-height: 1.1;
+    margin-bottom: 18px;
+  }
+  .track p {
+    font-size: 24px;
+    line-height: 1.4;
+    color: var(--text-soft);
+  }
+  .track.agent h3 { color: var(--accent); }
+  .track.risk  h3 { color: var(--gold);   }
+  .track.comm  h3 { color: var(--green);  }
+  .track .badge {
+    display: inline-block;
+    font-family: ui-monospace, monospace;
+    font-size: 16px; font-weight: 700;
+    letter-spacing: 1.5px;
+    padding: 4px 12px;
+    border-radius: 999px;
+    margin-top: 14px;
+  }
+  .track.agent .badge { background: rgba(99,102,241,0.18);  color: var(--accent-bright); border: 1px solid rgba(99,102,241,0.4); }
+  .track.risk  .badge { background: rgba(250,204,21,0.16); color: var(--gold);            border: 1px solid rgba(250,204,21,0.4); }
+  .track.comm  .badge { background: rgba(16,185,129,0.14); color: var(--green);           border: 1px solid rgba(16,185,129,0.4); }
+
+  @media print {
+    @page { size: 1920px 1080px; margin: 0; }
+    html, body { width: 1920px; }
+    .deck { width: 1920px; height: auto; }
+    .slide {
+      display: flex !important;
+      page-break-after: always;
+      position: relative;
+      transform: none !important;
+    }
+  }
+</style>
+</head>
+<body>
+
+<div class="deck" id="deck">
+
+  <!-- ─── Slide 1 — Title / Problem ─────────────────────────────────────── -->
+  <section class="slide active" data-num="1">
+    <div class="edge-glow"></div>
+    <div class="watermark eef">⊢ ⊨ ⊬ ⊥</div>
+    <div class="head">
+      <div class="brand">LedgerLens <span class="accent">×</span> <img src="./brightdata-logo.png" alt="Bright Data" class="bd-logo"></div>
+      <div class="meta">1 / 9 — Problem</div>
+    </div>
+    <div class="eyebrow">The Problem</div>
+    <h1 class="title tighter">Fast agents are dangerous<br>if they spend <span class="accent">before</span> verification.</h1>
+    <div class="body">
+      <ul class="points">
+        <li>Autonomous agents are about to spend <b>USD billions</b> via <em>x402</em> and <em>MCP-pay</em>.</li>
+        <li>The web they shop on is hostile: <b>scraped · gated · faked · stale</b>.</li>
+        <li>Today's default is <em>pay-first, verify-never</em>.</li>
+      </ul>
+    </div>
+    <div class="foot">
+      <div class="live"><span class="pulse"></span>https://ledgerlens.gemsquared.ai/</div>
+      <div class="right">GEM<sup>2</sup>.AI · Bright Data "Web Data UNLOCKED" Hackathon · 2026</div>
+    </div>
+  </section>
+
+  <!-- ─── Slide 2 — Solution / Slogan ───────────────────────────────────── -->
+  <section class="slide" data-num="2">
+    <div class="edge-glow"></div>
+    <div class="watermark">F:A→B|P</div>
+    <div class="head">
+      <div class="brand">LedgerLens <span class="accent">×</span> <img src="./brightdata-logo.png" alt="Bright Data" class="bd-logo"></div>
+      <div class="meta">2 / 9 — Our Solution</div>
+    </div>
+    <div class="eyebrow">Our Solution</div>
+    <h1 class="title"><em>No grounded claim,</em><br><em>no payment.</em></h1>
+    <div class="body">
+      <ul class="points">
+        <li><b>Buyer agent</b> extracts intent + spend policy from the principal's request.</li>
+        <li><b>Bright Data</b> fetches public-web evidence; a <b>seller agent</b> proposes an offer.</li>
+        <li><b>GEM<sup>2</sup> Trust Gate</b> releases — or blocks — <code>x402</code> settlement.</li>
+      </ul>
+    </div>
+    <div class="foot">
+      <div class="live"><span class="pulse"></span>We simulate settlement — the trust gate is real.</div>
+      <div class="right">GEM<sup>2</sup>.AI · Bright Data Hackathon 2026</div>
+    </div>
+  </section>
+
+  <!-- ─── Slide 3 — Pipeline ─────────────────────────────────────────────── -->
+  <section class="slide" data-num="3">
+    <div class="edge-glow"></div>
+    <div class="head">
+      <div class="brand">LedgerLens <span class="accent">×</span> <img src="./brightdata-logo.png" alt="Bright Data" class="bd-logo"></div>
+      <div class="meta">3 / 9 — Pipeline</div>
+    </div>
+    <div class="eyebrow">Pipeline</div>
+    <h1 class="title">Six contracts.<br><span class="accent">One direction.</span></h1>
+    <div class="pipeline">
+      <span class="chip">PRINCIPAL</span>
+      <span class="arrow">→</span>
+      <span class="chip">BUYER AGENT</span>
+      <span class="arrow">→</span>
+      <span class="chip">BRIGHT DATA</span>
+      <span class="arrow">→</span>
+      <span class="chip">SELLER AGENT</span>
+      <span class="arrow">→</span>
+      <span class="chip">GEM<sup>2</sup></span>
+      <span class="arrow">→</span>
+      <span class="chip">X402</span>
+      <span class="arrow">→</span>
+      <span class="chip">BUNDLE</span>
+    </div>
+    <div class="body">
+      <ul class="points">
+        <li>Every box has a typed CONTRACT — <code>F : A → B | P</code>. No silent state.</li>
+        <li>Every decision exports a <b>hash-chained audit bundle</b> — regulator-replayable.</li>
+        <li>Money only moves <em>after the last green check</em>.</li>
+      </ul>
+    </div>
+    <div class="foot">
+      <div class="live"><span class="pulse"></span>https://ledgerlens.gemsquared.ai/</div>
+      <div class="right">GEM<sup>2</sup>.AI · Bright Data Hackathon 2026</div>
+    </div>
+  </section>
+
+  <!-- ─── Slide 4 — Bright Data ──────────────────────────────────────────── -->
+  <section class="slide" data-num="4">
+    <div class="edge-glow"></div>
+    <div class="head">
+      <div class="brand">LedgerLens <span class="accent">×</span> <img src="./brightdata-logo.png" alt="Bright Data" class="bd-logo"></div>
+      <div class="meta">4 / 9 — Evidence</div>
+    </div>
+    <div class="eyebrow">Evidence Substrate</div>
+    <h1 class="title">Four Bright Data products,<br><em>distinct roles</em>.</h1>
+    <div class="body">
+      <ul class="points">
+        <li><b>SERP API</b> — discovers candidate sellers from live web search. <code>gem2_serp_api1</code></li>
+        <li><b>Web Unlocker + Browser API</b> — fetch + render evidence the public web hides. <code>gem2_web_unlocker1</code> · <code>gem2_scraping_browser1</code></li>
+        <li><b>MCP server</b> — natural-language tool surface for the buyer agent. <code>@brightdata/mcp</code> · 5 tools</li>
+      </ul>
+    </div>
+    <div class="foot">
+      <div class="live"><span class="pulse"></span>Four products in distinct roles — not one MCP wrapper.</div>
+      <div class="right">GEM<sup>2</sup>.AI · Bright Data Hackathon 2026</div>
+    </div>
+  </section>
+
+  <!-- ─── Slide 5 — GEM² Trust Gate ──────────────────────────────────────── -->
+  <section class="slide" data-num="5">
+    <div class="edge-glow"></div>
+    <div class="head">
+      <div class="brand">LedgerLens <span class="accent">×</span> <img src="./brightdata-logo.png" alt="Bright Data" class="bd-logo"></div>
+      <div class="meta">5 / 9 — Trust Gate</div>
+    </div>
+    <div class="eyebrow">Trust Gate</div>
+    <h1 class="title smaller">Two-stage formal audit<br><em>before money moves</em>.</h1>
+    <div class="eef-hero">
+      <div class="row">
+        <span class="tag g">⊢</span>
+        <span class="tag i">⊨</span>
+        <span class="tag e">⊬</span>
+        <span class="tag u">⊥</span>
+      </div>
+      <div class="legend">
+        <b>⊢</b>grounded <span class="sep">·</span>
+        <b>⊨</b>inferred <span class="sep">·</span>
+        <b>⊬</b>extrapolated <span class="sep">·</span>
+        <b>⊥</b>unknown
+      </div>
+    </div>
+    <div class="body">
+      <ul class="points">
+        <li><b>L1 P-check</b> — proves the buyer's preconditions hold against evidence (<em>ALLOW / DENY</em>).</li>
+        <li><b>L2 O-check</b> — proves the seller's claims are actually grounded (<em>SUCCESS / FAILURE</em>).</li>
+        <li>Powered by <code>gem2-tpmn-checker.fly.dev</code> — independent, replayable.</li>
+      </ul>
+    </div>
+    <div class="foot">
+      <div class="live"><span class="pulse"></span>https://ledgerlens.gemsquared.ai/</div>
+      <div class="right">GEM<sup>2</sup>.AI · Bright Data Hackathon 2026</div>
+    </div>
+  </section>
+
+  <!-- ─── Slide 6 — x402 Simulation ──────────────────────────────────────── -->
+  <section class="slide" data-num="6">
+    <div class="edge-glow"></div>
+    <div class="head">
+      <div class="brand">LedgerLens <span class="accent">×</span> <img src="./brightdata-logo.png" alt="Bright Data" class="bd-logo"></div>
+      <div class="meta">6 / 9 — Settlement</div>
+    </div>
+    <div class="eyebrow">x402 Settlement</div>
+    <h1 class="title">Protocol-correct.<br><span class="green">Zero counterparty risk.</span></h1>
+    <div class="body">
+      <ul class="points">
+        <li><code>SimulatedSettler</code> emits x402-shaped receipts — <code>settlementId</code> · <code>amountUSDC</code> · <code>mode=simulation</code>.</li>
+        <li>Provably safe: <code>real_transaction=false</code> · <code>realFundsUsed=false</code> · <code>privateKeysUsed=false</code>.</li>
+        <li>Drop-in to the <b>Coinbase x402 Go SDK</b> post-hackathon — same <code>Settler</code> interface, zero refactor.</li>
+      </ul>
+    </div>
+    <div class="foot">
+      <div class="live"><span class="pulse"></span>Ships the trust gate, not the wallet. The hardest part is built.</div>
+      <div class="right">GEM<sup>2</sup>.AI · Bright Data Hackathon 2026</div>
+    </div>
+  </section>
+
+  <!-- ─── Slide 7 — Proof ────────────────────────────────────────────────── -->
+  <section class="slide" data-num="7">
+    <div class="edge-glow"></div>
+    <div class="head">
+      <div class="brand">LedgerLens <span class="accent">×</span> <img src="./brightdata-logo.png" alt="Bright Data" class="bd-logo"></div>
+      <div class="meta">7 / 9 — Proof</div>
+    </div>
+    <div class="eyebrow">Live, working, audited</div>
+    <h1 class="title smaller tighter">Working in production.</h1>
+    <div class="stats-row">
+      <div class="stat"><div class="n deals">34</div><div class="l">deals audited</div></div>
+      <div class="stat"><div class="n approved">12</div><div class="l">approved</div></div>
+      <div class="stat"><div class="n blocked">22</div><div class="l">blocked</div></div>
+    </div>
+    <div class="body">
+      <ul class="points">
+        <li>Three modes — <b>LIVE</b> (Bright Data + GEM<sup>2</sup>, 20–45s) · <b>REPLAY</b> Case A/B (deterministic) · <b>VIEW</b> any historical bundle.</li>
+        <li><b>87 Bright Data evidence receipts</b> · ~19s average end-to-end verification latency.</li>
+        <li>Single Go binary + embedded Next.js · atomic <code>make deploy</code> with auto-rollback.</li>
+      </ul>
+    </div>
+    <div class="foot">
+      <div class="live"><span class="pulse"></span>https://ledgerlens.gemsquared.ai/</div>
+      <div class="right">GEM<sup>2</sup>.AI · Bright Data Hackathon 2026</div>
+    </div>
+  </section>
+
+  <!-- ─── Slide 8 — Multi-track cross-claim ──────────────────────────────── -->
+  <section class="slide" data-num="8">
+    <div class="edge-glow"></div>
+    <div class="head">
+      <div class="brand">LedgerLens <span class="accent">×</span> <img src="./brightdata-logo.png" alt="Bright Data" class="bd-logo"></div>
+      <div class="meta">8 / 9 — Tracks</div>
+    </div>
+    <div class="eyebrow">Same gate. Three judging lenses.</div>
+    <h1 class="title smaller tighter">One trust gate.<br>Three product shapes.</h1>
+    <div class="tracks">
+      <div class="track agent">
+        <div class="lbl">Primary</div>
+        <h3>Agent-to-Agent Payments</h3>
+        <p>Autonomous buyer ↔ seller settling via x402 simulation. Spend caps enforced at L3. Approval checkpoint visible.</p>
+        <span class="badge">T-Agent</span>
+      </div>
+      <div class="track risk">
+        <div class="lbl">Cross-claim</div>
+        <h3>Risk Management</h3>
+        <p>Third-party risk on autonomous sellers. Regulator-replayable audit bundles. Open-web evidence no SIEM monitors.</p>
+        <span class="badge">Track 3</span>
+      </div>
+      <div class="track comm">
+        <div class="lbl">Cross-claim</div>
+        <h3>Web Data Commerce</h3>
+        <p>Sellers price USDC-demo offers, buyers verify freshness + coverage before paying. Micropayments gated by truth.</p>
+        <span class="badge">T-Commerce</span>
+      </div>
+    </div>
+    <div class="foot">
+      <div class="live"><span class="pulse"></span>GEM<sup>2</sup> Trust Gate is the substrate. LedgerLens is the first product shape.</div>
+      <div class="right">GEM<sup>2</sup>.AI · Bright Data Hackathon 2026</div>
+    </div>
+  </section>
+
+  <!-- ─── Slide 9 — Ask ──────────────────────────────────────────────────── -->
+  <section class="slide" data-num="9">
+    <div class="edge-glow"></div>
+    <div class="watermark eef">⊢ ⊨ ⊬ ⊥</div>
+    <div class="head">
+      <div class="brand">LedgerLens <span class="accent">×</span> <img src="./brightdata-logo.png" alt="Bright Data" class="bd-logo"></div>
+      <div class="meta">9 / 9 — Ask</div>
+    </div>
+    <div class="ask-wrap">
+      <div class="eyebrow" style="margin-bottom:8px;">Try it now</div>
+      <h1 class="title tighter" style="margin-bottom:0;"><span class="accent">No grounded claim,</span><br><span class="accent">no payment.</span></h1>
+      <div class="url">https://ledgerlens.gemsquared.ai/</div>
+      <ul class="points">
+        <li><b>LIVE</b> — click <em>▸ Run Autonomous Deal</em> to verify a seller end-to-end.</li>
+        <li><b>SOURCE</b> — <code>github.com/gem-squared/ledgerlens</code> (MIT) — single Go binary, embedded Next.js.</li>
+        <li><b>TEAM</b> — gem-squared · <code>david@gineers.ai</code></li>
+      </ul>
+    </div>
+    <div class="foot">
+      <div class="live"><span class="pulse"></span>Fast agents are dangerous if they spend before verification. LedgerLens deliberately waits.</div>
+      <div class="right">GEM<sup>2</sup>.AI · Bright Data Hackathon 2026</div>
+    </div>
+  </section>
+
+</div>
+
+<script>
+  (function () {
+    const slides = document.querySelectorAll('.slide');
+    const total = slides.length;
+    let idx = 0;
+
+    function rescale() {
+      const vw = window.innerWidth, vh = window.innerHeight;
+      const sx = vw / 1920, sy = vh / 1080;
+      const s = Math.min(sx, sy);
+      const tx = (vw - 1920 * s) / 2;
+      const ty = (vh - 1080 * s) / 2;
+      slides.forEach(el => {
+        el.style.transform = `translate(${tx}px, ${ty}px) scale(${s})`;
+      });
+    }
+    function show(i) {
+      idx = (i + total) % total;
+      slides.forEach((el, k) => el.classList.toggle('active', k === idx));
+    }
+
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'ArrowRight' || e.key === ' ' || e.key === 'PageDown') { show(idx + 1); e.preventDefault(); }
+      else if (e.key === 'ArrowLeft' || e.key === 'PageUp')                 { show(idx - 1); e.preventDefault(); }
+      else if (e.key === 'Home')                                            { show(0); e.preventDefault(); }
+      else if (e.key === 'End')                                             { show(total - 1); e.preventDefault(); }
+      else if (/^[1-9]$/.test(e.key))                                       { show(parseInt(e.key, 10) - 1); e.preventDefault(); }
+    });
+    document.addEventListener('click', (e) => {
+      if (e.target.closest('a, button, code, pre')) return;
+      show(idx + 1);
+    });
+
+    window.addEventListener('resize', rescale);
+    rescale();
+
+    const sp = new URLSearchParams(window.location.search);
+    const want = parseInt(sp.get('slide') || '1', 10);
+    show((Number.isFinite(want) && want >= 1 && want <= total) ? want - 1 : 0);
+  })();
+</script>
+
+</body>
+</html>
