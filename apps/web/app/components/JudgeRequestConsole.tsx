@@ -2,7 +2,8 @@
 
 import { useEffect, useRef, useState } from 'react';
 import { runDealStream } from '@/lib/sse';
-import type { DealRunResult, RunMode, StepEvent } from '@/lib/types';
+import { listCases, runCase } from '@/lib/api';
+import type { CaseListItem, DealRunResult, RunMode, StepEvent } from '@/lib/types';
 import { AgentFlowTimeline } from './AgentFlowTimeline';
 import { RichRunResult } from './RichRunResult';
 
@@ -24,6 +25,7 @@ export function JudgeRequestConsole({ onRunComplete }: JudgeRequestConsoleProps 
   const [result, setResult] = useState<DealRunResult | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [politeReject, setPoliteReject] = useState<string | null>(null);
+  const [cases, setCases] = useState<CaseListItem[]>([]);
 
   const abortRef = useRef<AbortController | null>(null);
 
@@ -36,6 +38,13 @@ export function JudgeRequestConsole({ onRunComplete }: JudgeRequestConsoleProps 
     return () => clearInterval(id);
   }, [running]);
 
+  // Load the canonical Case A / Case B list once — used by REPLAY mode.
+  useEffect(() => {
+    listCases().then(setCases).catch((err) => {
+      console.error('listCases failed', err);
+    });
+  }, []);
+
   function reset() {
     setEvents([]);
     setLastEventAt(null);
@@ -44,7 +53,7 @@ export function JudgeRequestConsole({ onRunComplete }: JudgeRequestConsoleProps 
     setPoliteReject(null);
   }
 
-  function onRun() {
+  function onRunLive() {
     if (running) return;
     reset();
     setRunning(true);
@@ -54,13 +63,12 @@ export function JudgeRequestConsole({ onRunComplete }: JudgeRequestConsoleProps 
         query,
         maxSpendUSDC: 0.001,
         requireGrounded: true,
-        mode: mode === 'replay' ? 'live' : mode,
+        mode: 'live',
       },
       {
         onStep: (e) => {
           setEvents((prev) => [...prev, e]);
           setLastEventAt(Date.now());
-          // Off-domain reject surfaces as a step event with status=rejected.
           if (e.status === 'rejected') {
             const d = e.detail as { polite_reject?: string } | undefined;
             if (d?.polite_reject) setPoliteReject(d.polite_reject);
@@ -69,11 +77,9 @@ export function JudgeRequestConsole({ onRunComplete }: JudgeRequestConsoleProps 
         onResult: (r) => {
           setResult(r);
           setRunning(false);
-          // Tell the dashboard a new audit bundle exists → refetch counters.
           onRunComplete?.();
         },
         onError: (err) => {
-          // Parse off_domain rejection from the JSON path (race condition guard)
           if (err.error?.includes('off_domain')) {
             setPoliteReject(
               'This demo is scoped to autonomous web-data purchase requests. Try the default NYSE/NASDAQ market data request.',
@@ -84,11 +90,26 @@ export function JudgeRequestConsole({ onRunComplete }: JudgeRequestConsoleProps 
           setRunning(false);
         },
         onClose: () => {
-          // ensure we drop the running flag even if onResult wasn't reached
           setRunning(false);
         },
       },
     );
+  }
+
+  async function onRunReplay(caseId: string) {
+    if (running) return;
+    reset();
+    setRunning(true);
+    setRunStartedAt(Date.now());
+    try {
+      const r = await runCase(caseId);
+      setResult(r);
+      onRunComplete?.();
+    } catch (e: unknown) {
+      setError(e instanceof Error ? e.message : String(e));
+    } finally {
+      setRunning(false);
+    }
   }
 
   function onCancel() {
@@ -113,72 +134,116 @@ export function JudgeRequestConsole({ onRunComplete }: JudgeRequestConsoleProps 
           <ModeSwitch mode={mode} setMode={setMode} disabled={running} />
         </div>
 
-        <textarea
-          className="block h-24 w-full resize-none rounded-lg border border-zinc-800 bg-zinc-950 px-3 py-2 text-sm leading-relaxed text-zinc-100 placeholder-zinc-600 focus:border-simBadge focus:outline-none disabled:opacity-50"
-          value={query}
-          onChange={(e) => setQuery(e.target.value)}
-          disabled={running}
-          spellCheck={false}
-        />
+        {/* LIVE / PRE-WARMED: free-text query → SSE deal pipeline */}
+        {mode !== 'replay' && (
+          <>
+            <textarea
+              className="block h-24 w-full resize-none rounded-lg border border-zinc-800 bg-zinc-950 px-3 py-2 text-sm leading-relaxed text-zinc-100 placeholder-zinc-600 focus:border-simBadge focus:outline-none disabled:opacity-50"
+              value={query}
+              onChange={(e) => setQuery(e.target.value)}
+              disabled={running}
+              spellCheck={false}
+            />
 
-        <div className="mt-3 rounded-md border border-zinc-800 bg-zinc-950 px-3 py-2 text-xs leading-relaxed text-zinc-400">
-          {mode === 'live' && (
-            <>
-              Live verification typically completes in <strong>20–45 seconds</strong>. Each step
-              below updates as Bright Data fetches evidence and GEM² audits the seller&apos;s claim.{' '}
-              <span className="italic text-zinc-300">
-                Fast agents are dangerous if they spend before verification. LedgerLens deliberately waits.
-              </span>
-            </>
-          )}
-          {mode === 'prewarmed' && (
-            <>
-              Pre-warmed mode reuses cached Bright Data evidence and runs a live GEM² audit. Target
-              latency <strong>5–8 seconds</strong>. The trust gate is still real.{' '}
-              <span className="rounded bg-yellow-500/20 px-1.5 py-0.5 text-[10px] font-semibold uppercase tracking-wider text-yellow-300">
-                Slice 3 — not yet shipped
-              </span>
-            </>
-          )}
-          {mode === 'replay' && (
-            <>
-              Replay mode shows a fixed deterministic Case A (blocked) or Case B (approved) — no
-              live verification. Use the cards at the bottom of the page.
-            </>
-          )}
-        </div>
+            <div className="mt-3 rounded-md border border-zinc-800 bg-zinc-950 px-3 py-2 text-xs leading-relaxed text-zinc-400">
+              {mode === 'live' && (
+                <>
+                  Live verification typically completes in <strong>20–45 seconds</strong>. Each step
+                  below updates as Bright Data fetches evidence and GEM² audits the seller&apos;s claim.{' '}
+                  <span className="italic text-zinc-300">
+                    Fast agents are dangerous if they spend before verification. LedgerLens deliberately waits.
+                  </span>
+                </>
+              )}
+              {mode === 'prewarmed' && (
+                <>
+                  Pre-warmed mode reuses cached Bright Data evidence and runs a live GEM² audit. Target
+                  latency <strong>5–8 seconds</strong>. The trust gate is still real.{' '}
+                  <span className="rounded bg-yellow-500/20 px-1.5 py-0.5 text-[10px] font-semibold uppercase tracking-wider text-yellow-300">
+                    Slice 3 — not yet shipped
+                  </span>
+                </>
+              )}
+            </div>
 
-        <div className="mt-4 flex flex-wrap items-center gap-3">
-          <button
-            type="button"
-            onClick={onRun}
-            disabled={running || mode === 'replay' || !query.trim()}
-            className="rounded-md bg-simBadge px-5 py-2.5 text-sm font-semibold text-white shadow-md hover:bg-indigo-500 disabled:cursor-not-allowed disabled:opacity-40"
-          >
-            {running ? 'Verifying…' : '▸ Run Autonomous Deal'}
-          </button>
-          {running && (
-            <button
-              type="button"
-              onClick={onCancel}
-              className="rounded-md border border-zinc-700 px-3 py-2 text-xs text-zinc-300 hover:border-zinc-500"
-            >
-              Cancel
-            </button>
-          )}
-          {!running && (events.length > 0 || result) && (
-            <button
-              type="button"
-              onClick={onReset}
-              className="rounded-md border border-zinc-700 px-3 py-2 text-xs text-zinc-300 hover:border-zinc-500"
-            >
-              Reset
-            </button>
-          )}
-          <span className="text-[11px] uppercase tracking-wider text-zinc-500">
-            Mode: <span className="text-zinc-300">{mode}</span>
-          </span>
-        </div>
+            <div className="mt-4 flex flex-wrap items-center gap-3">
+              <button
+                type="button"
+                onClick={onRunLive}
+                disabled={running || !query.trim() || mode === 'prewarmed'}
+                className="rounded-md bg-simBadge px-5 py-2.5 text-sm font-semibold text-white shadow-md hover:bg-indigo-500 disabled:cursor-not-allowed disabled:opacity-40"
+              >
+                {running ? 'Verifying…' : '▸ Run Autonomous Deal'}
+              </button>
+              {running && (
+                <button
+                  type="button"
+                  onClick={onCancel}
+                  className="rounded-md border border-zinc-700 px-3 py-2 text-xs text-zinc-300 hover:border-zinc-500"
+                >
+                  Cancel
+                </button>
+              )}
+              {!running && (events.length > 0 || result) && (
+                <button
+                  type="button"
+                  onClick={onReset}
+                  className="rounded-md border border-zinc-700 px-3 py-2 text-xs text-zinc-300 hover:border-zinc-500"
+                >
+                  Reset
+                </button>
+              )}
+              <span className="text-[11px] uppercase tracking-wider text-zinc-500">
+                Mode: <span className="text-zinc-300">{mode}</span>
+              </span>
+            </div>
+          </>
+        )}
+
+        {/* REPLAY: canonical Case A / Case B cards, click-to-run inline */}
+        {mode === 'replay' && (
+          <>
+            <div className="rounded-md border border-zinc-800 bg-zinc-950 px-3 py-2 text-xs leading-relaxed text-zinc-400">
+              Replay mode runs a fixed scripted scenario through the same GEM² trust gate.
+              No live web variance — useful as a demo safety net if the live audit gate is
+              slow or unreachable. Click a card to run.
+            </div>
+
+            <div className="mt-3 grid gap-3 sm:grid-cols-2">
+              {cases.map((c) => (
+                <button
+                  key={c.id}
+                  type="button"
+                  onClick={() => onRunReplay(c.id)}
+                  disabled={running}
+                  className={`group flex flex-col gap-2 rounded-lg border p-4 text-left transition ${
+                    running
+                      ? 'cursor-not-allowed border-zinc-800 bg-zinc-900/40 opacity-60'
+                      : 'border-zinc-800 bg-zinc-900/40 hover:border-simBadge hover:bg-zinc-900'
+                  }`}
+                >
+                  <div className="flex items-center gap-2">
+                    <span className="font-mono text-xs uppercase text-zinc-500">▶ run</span>
+                    <h3 className="text-base font-semibold text-zinc-100">{c.title}</h3>
+                  </div>
+                  <p className="text-xs leading-relaxed text-zinc-400">{c.description}</p>
+                </button>
+              ))}
+            </div>
+
+            {!running && result && (
+              <div className="mt-4">
+                <button
+                  type="button"
+                  onClick={onReset}
+                  className="rounded-md border border-zinc-700 px-3 py-2 text-xs text-zinc-300 hover:border-zinc-500"
+                >
+                  Reset
+                </button>
+              </div>
+            )}
+          </>
+        )}
 
         {politeReject && (
           <div className="mt-4 rounded-lg border border-amber-500/40 bg-amber-500/10 p-3 text-sm text-amber-200">
@@ -196,11 +261,11 @@ export function JudgeRequestConsole({ onRunComplete }: JudgeRequestConsoleProps 
         )}
       </section>
 
-      {/* ── Live timeline ──────────────────────────────────────────────── */}
-      {runStartedAt !== null && (
+      {/* ── Live timeline (LIVE/PRE-WARMED only; REPLAY is blocking) ───── */}
+      {mode !== 'replay' && runStartedAt !== null && (
         <section className="rounded-xl border border-zinc-800 bg-zinc-900/30 p-5">
           <AgentFlowTimeline
-            mode={mode === 'replay' ? 'live' : mode}
+            mode={mode}
             runStartedAt={runStartedAt}
             events={events}
             done={!running && (result !== null || error !== null || politeReject !== null)}
@@ -209,7 +274,7 @@ export function JudgeRequestConsole({ onRunComplete }: JudgeRequestConsoleProps 
         </section>
       )}
 
-      {/* Unified post-run surface — shared with Case A/B replay + Recent-Activity View. */}
+      {/* Unified post-run surface — same UI for LIVE, REPLAY, and Recent-Activity View. */}
       {result && <RichRunResult result={result} />}
     </div>
   );

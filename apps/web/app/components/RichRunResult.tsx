@@ -8,10 +8,9 @@ import { EvidenceList } from './EvidenceList';
 import { ClaimAssessmentTable } from './ClaimAssessmentTable';
 
 // One canonical post-run rendering surface. Used by:
-//   - JudgeRequestConsole (after a LIVE deal completes)
-//   - CaseRunner (after a deterministic Case A/B replay)
+//   - JudgeRequestConsole (LIVE deal + REPLAY Case A/B)
 //   - BundleViewer (when a judge clicks "View" on a Recent Activity row)
-// All three entry points get the same Final Report banner + GEM² Audit Score
+// All entry points get the same Final Report banner + GEM² Audit Score
 // rings + X402 Settlement card + Bright Data Evidence list + collapsible
 // canonical-EEF claim assessment + footer line.
 export function RichRunResult({ result }: { result: DealRunResult }) {
