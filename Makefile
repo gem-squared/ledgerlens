@@ -76,6 +76,12 @@ web-build:
 	cd apps/web && pnpm build
 
 web-export:
+	@echo "==> mirroring pitch/ → apps/web/public/pitch/ (deck served at /pitch/)"
+	@# pitch/ at repo root is the single source of truth for the deck.
+	@# Mirror into apps/web/public/pitch/ so Next.js static export bundles it
+	@# and the Go binary serves it at /pitch/index.html.
+	mkdir -p apps/web/public/pitch
+	cp -R pitch/. apps/web/public/pitch/
 	@echo "==> exporting Next.js to apps/web/out/ (static)"
 	cd apps/web && NEXT_OUTPUT_MODE=export pnpm build
 	@echo "==> syncing apps/web/out/ → cmd/ledgerlens/web_static/"

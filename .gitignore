@@ -10,10 +10,16 @@ Confidential-data/
 .gem-squared/
 CLAUDE.md
 
-# === Docs — local-only working notes, pitch deck, integration docs, etc. ===
-# Strategy / pitch / demo-script / judge-guide / legal notices live in Docs/
-# but stay off the public repo (per david@gineers.ai, 2026-05-25).
+# === Docs — local-only working notes, integration docs, etc. ===
+# Strategy / demo-script / judge-guide / legal notices live in Docs/ but
+# stay off the public repo (per david@gineers.ai, 2026-05-25). The
+# public pitch deck lives at pitch/ at the repo root.
 Docs/
+
+# === Generated build artifacts ===
+# pitch/ at root is the source of truth; web-export mirrors it here so the
+# Next.js static export bundles the deck into the Go binary at /pitch/.
+apps/web/public/pitch/
 
 # === OS / editor ===
 .DS_Store
