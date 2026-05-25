@@ -10,6 +10,32 @@ import { RichRunResult } from './RichRunResult';
 const DEFAULT_QUERY =
   'Find a trustworthy live NYSE + NASDAQ market data provider under $0.001/query.';
 
+// Curated LIVE queries that exercise distinct LedgerLens behaviors. Used
+// only to populate the textarea — the judge can edit before running, and
+// the actual deal still runs LIVE through Bright Data + GEM².
+const SAMPLE_QUERIES: { label: string; query: string }[] = [
+  {
+    label: 'APPROVED CASE — NYSE + NASDAQ live market data',
+    query: 'Find a trustworthy live NYSE + NASDAQ market data provider under $0.001/query.',
+  },
+  {
+    label: 'APPROVED CASE — BTC-USD live spot price feed',
+    query: 'Find a real-time BTC-USD spot price feed under $0.0005/query.',
+  },
+  {
+    label: 'BLOCKED CASE — Live political polling aggregator',
+    query: 'Find a live political polling aggregator updated within 1 hour, free tier.',
+  },
+  {
+    label: 'BLOCKED CASE — Real-time satellite imagery API',
+    query: 'Find a real-time satellite imagery API with 10-meter resolution under $0.01/query.',
+  },
+  {
+    label: 'OFF-DOMAIN CASE — Dinner recipes',
+    query: 'Find me dinner recipes for tonight.',
+  },
+];
+
 interface JudgeRequestConsoleProps {
   /** Called when a run completes (success or error) so the dashboard can refetch. */
   onRunComplete?: () => void;
@@ -137,6 +163,29 @@ export function JudgeRequestConsole({ onRunComplete }: JudgeRequestConsoleProps 
         {/* LIVE / PRE-WARMED: free-text query → SSE deal pipeline */}
         {mode !== 'replay' && (
           <>
+            <div className="mb-2 flex items-center gap-2">
+              <label htmlFor="sample-picker" className="text-[11px] uppercase tracking-wider text-zinc-500">
+                Sample requests
+              </label>
+              <select
+                id="sample-picker"
+                disabled={running}
+                value=""
+                onChange={(e) => {
+                  const pick = SAMPLE_QUERIES.find((s) => s.label === e.target.value);
+                  if (pick) setQuery(pick.query);
+                  // Reset back to placeholder so re-picking the same item still fires onChange.
+                  e.target.value = '';
+                }}
+                className="flex-1 rounded-md border border-zinc-800 bg-zinc-950 px-2 py-1 text-xs text-zinc-300 focus:border-simBadge focus:outline-none disabled:opacity-50"
+              >
+                <option value="">▾ Pick a sample request (populates the textarea — judge can edit before running)</option>
+                {SAMPLE_QUERIES.map((s) => (
+                  <option key={s.label} value={s.label}>{s.label}</option>
+                ))}
+              </select>
+            </div>
+
             <textarea
               className="block h-24 w-full resize-none rounded-lg border border-zinc-800 bg-zinc-950 px-3 py-2 text-sm leading-relaxed text-zinc-100 placeholder-zinc-600 focus:border-simBadge focus:outline-none disabled:opacity-50"
               value={query}
