@@ -9,11 +9,14 @@ export default function Home() {
       <HeroSection />
 
       <div className="mt-6">
-        <ArchitectureOverview />
+        <DashboardShell />
       </div>
 
-      <div className="mt-6">
-        <DashboardShell />
+      {/* Architecture overview moved below the data so the dashboard leads with proof.
+          The diagram is supporting context for visitors who want to know HOW the
+          numbers above are produced. */}
+      <div className="mt-14 border-t border-zinc-800 pt-8">
+        <ArchitectureOverview />
       </div>
 
       {/* Deterministic replay (former Case A / Case B — Unit 5) */}

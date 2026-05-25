@@ -6,7 +6,16 @@ export function HeroSection() {
           <span className="inline-block rounded-full bg-simBadge px-3 py-1 text-xs font-semibold uppercase tracking-wider text-white">
             Simulation Mode
           </span>
-          <h1 className="mt-3 text-4xl font-bold tracking-tight">LedgerLens</h1>
+          <h1 className="mt-3 flex flex-wrap items-center gap-x-3 gap-y-1 text-4xl font-bold tracking-tight">
+            <span>LedgerLens</span>
+            <span aria-hidden className="text-3xl font-light text-zinc-500">×</span>
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img
+              src="/brightdata-logo.png"
+              alt="Bright Data"
+              className="h-7 w-auto sm:h-8"
+            />
+          </h1>
           <p className="mt-1 text-lg text-zinc-400">No grounded claim, no payment.</p>
         </div>
         <a
