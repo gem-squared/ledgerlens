@@ -41,21 +41,12 @@ export function VerdictReveal({ verdict }: VerdictRevealProps) {
       {/* Icon */}
       <m.div
         className="relative z-10 text-5xl"
-        initial={isApproved ? { scale: 0, opacity: 0 } : { scale: 2, opacity: 0 }}
-        animate={isApproved ? { scale: 1, opacity: 1 } : { scale: 1, opacity: 1 }}
-        transition={isApproved ? SPRING_BOUNCY : { duration: 0.3 }}
+        initial={isApproved ? { scale: 0, opacity: 0 } : { scale: 2, opacity: 0, x: 0 }}
+        animate={isApproved ? { scale: 1, opacity: 1 } : { scale: 1, opacity: 1, x: [-4, 4, -3, 3, 0] }}
+        transition={isApproved ? SPRING_BOUNCY : { duration: 0.4 }}
       >
         {isApproved ? '✅' : '❌'}
       </m.div>
-
-      {/* Shake for blocked */}
-      {!isApproved && (
-        <m.div
-          className="absolute inset-0"
-          animate={{ x: [-4, 4, -3, 3, 0] }}
-          transition={{ delay: 0.2, duration: 0.3 }}
-        />
-      )}
 
       {/* Verdict text */}
       <m.p

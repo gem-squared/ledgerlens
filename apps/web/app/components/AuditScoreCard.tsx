@@ -131,8 +131,9 @@ function GateDimensions({ title, gate }: { title: string; gate?: GateResponse })
               <div className="mt-1 h-1.5 w-full overflow-hidden rounded-full bg-zinc-900">
                 <m.div
                   className={`h-full ${TONE_BG[tone]}`}
-                  initial={{ width: '0%' }}
-                  animate={{ width: `${d.score}%` }}
+                  style={{ width: `${d.score}%`, transformOrigin: 'left' }}
+                  initial={{ scaleX: 0 }}
+                  animate={{ scaleX: 1 }}
                   transition={{ duration: 0.7, ease: 'easeOut', delay: 0.05 * idx }}
                 />
               </div>

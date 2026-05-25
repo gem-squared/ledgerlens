@@ -31,14 +31,11 @@ export function ArchitectureOverview() {
         </span>
       </div>
 
-      <m.div
-        className="flex flex-col gap-3 lg:flex-row lg:items-stretch lg:gap-2"
-        variants={staggerContainer}
-      >
+      <div className="flex flex-col gap-3 lg:flex-row lg:items-stretch lg:gap-2">
         {STEPS.map((s, i) => (
           <Step key={s.id} step={s} hasArrow={i < STEPS.length - 1} isGem2={s.id === 'gem2'} />
         ))}
-      </m.div>
+      </div>
 
       <m.p
         className="mt-4 text-xs italic text-zinc-500"

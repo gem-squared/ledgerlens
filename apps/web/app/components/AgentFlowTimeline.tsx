@@ -340,11 +340,8 @@ function StepCard({ index, title, label, status, isActive, activeFrac }: StepCar
   return (
     <m.div
       className={`relative overflow-hidden rounded-lg border ${bg} ${glow} px-4 py-3`}
-      animate={{
-        scale: isActive ? 1.02 : 1,
-        x: status === 'blocked' || status === 'failed' ? [-4, 4, -3, 3, 0] : 0,
-      }}
-      transition={isActive ? { scale: { ...SPRING_SNAPPY } } : { duration: 0.3 }}
+      animate={{ scale: isActive ? 1.02 : 1 }}
+      transition={isActive ? SPRING_SNAPPY : { duration: 0.3 }}
     >
       <div className="flex items-center gap-3">
         <m.span
