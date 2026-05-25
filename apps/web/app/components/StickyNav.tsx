@@ -4,8 +4,7 @@ import { useEffect, useState } from 'react';
 
 const NAV_ITEMS = [
   { id: 'how-it-works', label: 'How It Works' },
-  { id: 'evidence', label: 'Evidence' },
-  { id: 'audit', label: 'Audit & Trust' },
+  { id: 'evidence', label: 'Evidence & Audit' },
   { id: 'settlement', label: 'Settlement' },
 ] as const;
 

@@ -1,41 +1,45 @@
 import { HeroSection } from './components/HeroSection';
-import { ArchitectureOverview } from './components/ArchitectureOverview';
+import { StickyNav } from './components/StickyNav';
+import { ScrollSection } from './components/ScrollSection';
+import { HowItWorks } from './components/HowItWorks';
 import { DashboardShell } from './components/DashboardShell';
 import { CaseRunner } from './components/CaseRunner';
 
 export default function Home() {
   return (
-    <main className="mx-auto max-w-6xl px-6 py-10">
-      <HeroSection />
+    <main className="mx-auto max-w-6xl px-6">
+      <StickyNav />
 
-      <div className="mt-6">
-        <ArchitectureOverview />
-      </div>
-
-      <div className="mt-6">
-        <DashboardShell />
-      </div>
-
-      {/* Deterministic replay (former Case A / Case B — Unit 5) */}
-      <section className="mt-14 border-t border-zinc-800 pt-8">
-        <h2 className="text-base font-semibold uppercase tracking-wider text-zinc-300">
-          Deterministic Replay
-        </h2>
-        <p className="mt-1 max-w-3xl text-sm text-zinc-500">
-          Canonical scripted scenarios. Use these when you want a fixed BLOCKED /
-          APPROVED outcome (no live web variance) — useful as a demo safety net if
-          the live audit gate is slow or unreachable.
-        </p>
-        <div className="mt-5">
-          <CaseRunner />
-        </div>
+      <section id="hero" className="py-10">
+        <HeroSection />
       </section>
 
-      <footer className="mt-12 border-t border-zinc-800 pt-6 text-xs text-zinc-500">
-        Built for the Bright Data &quot;Web Data UNLOCKED&quot; Hackathon. Three modes:{' '}
-        <strong>LIVE</strong> 20–45s · <strong>PRE-WARMED</strong> 5–8s ·{' '}
-        <strong>REPLAY</strong> instant. L1 / L2 audit by{' '}
-        <code>gem2-tpmn-checker.fly.dev</code>.
+      <ScrollSection id="how-it-works" speed={1.0}>
+        <h2 className="section-heading">How It Works</h2>
+        <p className="section-sub">
+          Trust-gated verification in 7 steps — no grounded claim, no payment.
+        </p>
+        <HowItWorks />
+      </ScrollSection>
+
+      <ScrollSection id="evidence" speed={0.7}>
+        <h2 className="section-heading">Real-Time Evidence &amp; Audit</h2>
+        <p className="section-sub">
+          Bright Data collects public-web proof. GEM² verifies every claim before payment.
+        </p>
+        <DashboardShell />
+      </ScrollSection>
+
+      <ScrollSection id="settlement" speed={1.3}>
+        <h2 className="section-heading">Settlement Simulation</h2>
+        <p className="section-sub">
+          Deterministic replay — fixed BLOCKED / APPROVED outcomes for demo safety.
+        </p>
+        <CaseRunner />
+      </ScrollSection>
+
+      <footer className="py-12 border-t border-white/[0.08] text-xs text-zinc-500 text-center">
+        Built for the Bright Data &quot;Web Data UNLOCKED&quot; Hackathon · LedgerLens by GEM².AI
       </footer>
     </main>
   );
