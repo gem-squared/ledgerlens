@@ -23,7 +23,7 @@
 2. ⊢ **Slogan:** **No grounded claim, no payment.**
 3. ⊢ **Primary track:** Agent-to-Agent Payments / Autonomous Agents (two agents settling autonomously). Claim Web Data Commerce + General Web Data as multi-track.
 4. ⊢ **Stack lock:** **Go-first** — one Go binary owns the Trust Gate, audit bundle, decision packet, x402 settlement state, and Bright Data wrappers. Next.js owns the demo UI. TS shim slots reserved but probably unused.
-5. ⊢ **Originality moat:** the GEM² Trust Gate — visible epistemic verification BEFORE money moves. No other team will ship this. **L1 P-check + L2 O-check are integrated via the deployed `gem2-tpmn-checker.fly.dev` audit-gate API (David-owned, production-tested via TechEx); we do not rebuild it.**
+5. ⊢ **Originality moat:** the GEM² Trust Gate — visible epistemic verification BEFORE money moves. No other team will ship this. **L1 P-check + L2 O-check are integrated via the deployed `gem2-tpmn-checker.fly.dev` audit-gate API (GEM².AI-operated, production-tested via TechEx); we do not rebuild it.**
 6. ⊢ **Bright Data depth:** SERP + Web Unlocker + Browser API + MCP Server (Web Scraper API optional). Four products in distinct roles, not one MCP wrapper.
 7. ⊢ **x402:** **protocol SIMULATION mode** — we model the HTTP 402 lifecycle locally (PAYMENT_REQUIRED → PENDING_VERIFICATION → APPROVED/BLOCKED → SIMULATED_SETTLED). No real chain, no Coinbase account, no private keys in the public demo. Settlement receipt is JSON tagged `mode: "simulation"`. Real x402 settlement = post-hackathon swap behind a `Settler` interface.
 8. ⊢ **Demo spine (≤5 min):** seller-agent posts offer → buyer-agent requests data → Bright Data fetches evidence → GEM² L1+L2 audit-gate scores → L3 APPROVES or **BLOCKS** payment → simulated settlement receipt → audit bundle exports.
@@ -41,7 +41,7 @@
 | Claim taxonomy | 5-tag (added "speculative") | **Canonical EEF — 4 tags: ⊢ ⊨ ⊬ ⊥**. "Speculative" is a UI label for ⊬-without-basis | Preserves universal EEF discipline; UI stays vivid |
 | Architecture | "4 separate agents/services" | **One Go binary, contracts internally** (buyer / seller / verifier / gate as ROLES, not processes) | 7 deployment surfaces in 8 days = lost hours |
 | Compliance | implicit | **Thin compliance surface explicit:** spending cap · public-only · immutable audit log · AUP-aware source policy | Keeps the word honest without overpromising |
-| **L1 / L2 verification** (v2.1) | "build LLM-driven verifier from scratch" | **Integrate deployed `gem2-tpmn-checker.fly.dev` audit-gate API** (P-check + O-check, v1.1 with RAG evidence) | David owns the platform; TechEx proved the integration path; eliminates the largest prompt-engineering risk in the 8-day arc. ⊢ References: `Gem-squared-AI/gem2-TPMN-checker/AUDIT_GATE_API.md` + `Hackathon/TechEx/console/audit_gate_client.go`. |
+| **L1 / L2 verification** (v2.1) | "build LLM-driven verifier from scratch" | **Integrate deployed `gem2-tpmn-checker.fly.dev` audit-gate API** (P-check + O-check, v1.1 with RAG evidence) | GEM².AI operates the platform; TechEx proved the integration path; eliminates the largest prompt-engineering risk in the 8-day arc. ⊢ References: the GEM² audit-gate API spec (proprietary internal documentation) + TechEx audit-gate Go client reference (MIT). |
 | **Layer naming** (v2.1) | L0/L1/L2/L3 = Evidence/Memory/Verify/Release | **Dual framing**: Architectural stack (Evidence/Memory/Verification/Release) PLUS per-contract gate pair (L1 P-check + L2 O-check from production canonical) | Both framings are real; production API uses L1/L2 to mean the gate pair INSIDE the Verification layer. See §5. |
 | **Lobster Trap** (v2.1) | not in scope | **Optional regex-only L0/L3 (T+2 stretch)** ported from TechEx — pure-Go DPI, no LLM cost | Cheap defense; answers prompt-injection-in-scraped-pages risk proactively in the demo |
 | **Settlement** (v2.2) | "Coinbase Go SDK on Base Sepolia, real tx_hash" | **x402 protocol SIMULATION** — Go state machine, no chain, no private keys, no testnet funds | Public demo cannot expose personal accounts. Differentiator is the Trust Gate, not the chain. Settlement receipt tagged `mode: "simulation"`. Real x402 = post-hackathon swap behind `Settler` interface. Pitch line: *"We simulate settlement, but the trust gate is real."* |
@@ -401,7 +401,7 @@ docs/
 | MCP client | `github.com/mark3labs/mcp-go` | Production Go MCP SDK (1,880+ importers) |
 | MCP+x402 bridge (post-hackathon) | `github.com/mark3labs/mcp-go-x402` | Direct pattern fit for future MCP-tool-pay |
 | Bright Data HTTP | stdlib `net/http` + thin wrapper | SERP/Unlocker/Browser are all REST |
-| **Audit gate** | `gem2-tpmn-checker.fly.dev` (production HTTP API, v1.1) | **NO SDK needed — stdlib `net/http`. David owns the platform; `GEM2_API_KEY` already provisioned.** Eliminates L2 prompt-engineering risk. |
+| **Audit gate** | `gem2-tpmn-checker.fly.dev` (production HTTP API, v1.1) | **NO SDK needed — stdlib `net/http`. GEM².AI operates the platform; `GEM2_API_KEY` already provisioned.** Eliminates L2 prompt-engineering risk. |
 | Audit gate Go client | port from `TechEx/console/audit_gate_client.go` (MIT) | Working reference; copy-paste viable |
 | Storage | SQLite via `modernc.org/sqlite` (pure-Go) | Zero-dep demo; matches TechEx stack exactly |
 | Layer audit log schema | port from `TechEx/console/audit_log.go` `layer_audit_log` table (MIT) | Regulator-replay-ready local mirror |
@@ -892,8 +892,8 @@ H2_Plan ≜ [
 - mark3labs/mcp-go (1,880 importers — production Go MCP SDK)
 - mark3labs/mcp-go-x402 (x402 transport for MCP-Go — direct LedgerLens pattern)
 
-**GEM² production audit infrastructure (internal — David-owned)**
-- `Gem-squared-AI/gem2-TPMN-checker/AUDIT_GATE_API.md` v1.1 (2026-05-18) — production audit-gate API spec, RAG-augmented, hash-only audit trail
+**GEM² production audit infrastructure (internal — GEM².AI-operated)**
+- the GEM² audit-gate API spec (proprietary internal documentation) v1.1 (2026-05-18) — production audit-gate API spec, RAG-augmented, hash-only audit trail
 - `Hackathon/TechEx/` — working Go integration of the audit gate (Track 1, TechEx 2026); live at `https://techex-track1.gemsquared.ai/`
 - TechEx reusables (all MIT): `console/audit_gate_client.go`, `console/audit_log.go`, `console/lobstertrap.go`, `console/ce_contract_parser.go`
 - Production audit gate base URL: `https://gem2-tpmn-checker.fly.dev` (staging fallback available)

@@ -173,5 +173,5 @@ Live cost per full e2e run: ~$0.066 (3 audit-gate calls × ~$0.022, claude-sonne
 
 - `Docs/Bright-Data-winning-strategy.md` §8 (canonical flow, simulation rationale)
 - `Docs/GEM2_AUDIT_MODEL.md` (audit layer details)
-- AUDIT_GATE_API.md (upstream gem2-tpmn-checker API spec)
+- GEM² audit-gate API spec (proprietary; available from GEM².AI)
 - Coinbase x402 docs (post-hackathon reference): https://docs.cdp.coinbase.com/x402/welcome

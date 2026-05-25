@@ -1,6 +1,6 @@
 # GEM² Audit Model
 
-How LedgerLens uses GEM² across the audit stack. Implementation lives in `internal/trustgate/`; the upstream gem2-tpmn-checker API spec is `Gem-squared-AI/gem2-TPMN-checker/AUDIT_GATE_API.md` v1.1.
+How LedgerLens uses GEM² across the audit stack. Implementation lives in `internal/trustgate/`; the upstream gem2-tpmn-checker API spec is the GEM² audit-gate API spec (proprietary internal documentation) v1.1.
 
 ## Two complementary framings
 
@@ -119,6 +119,6 @@ go test -v -count=1 -timeout 240s ./internal/trustgate/auditgate/...
 
 ## References
 
-- `Gem-squared-AI/gem2-TPMN-checker/AUDIT_GATE_API.md` v1.1 (upstream API spec)
+- GEM² audit-gate API spec v1.1 (proprietary; available via GEM².AI)
 - `Hackathon/TechEx/console/audit_gate_client.go` (reference Go integration, MIT)
 - `Docs/Bright-Data-winning-strategy.md` §5 (high-level architecture)

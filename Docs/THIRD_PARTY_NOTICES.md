@@ -40,7 +40,7 @@ LedgerLens depends on the following Go modules at runtime. Each is used under it
 
 The following SaaS is **called** by LedgerLens but is **not** part of this MIT-licensed source:
 
-- **GEM² Truth-Filter SaaS** at `https://gem2-tpmn-checker.fly.dev` — proprietary GEM².AI infrastructure. LedgerLens uses the `/api/audit-gate/p-check` and `/api/audit-gate/o-check` endpoints under David's `GEM2_API_KEY`. See `Gem-squared-AI/gem2-TPMN-checker/AUDIT_GATE_API.md` for the public API spec.
+- **GEM² Truth-Filter SaaS** at `https://gem2-tpmn-checker.fly.dev` — proprietary GEM².AI infrastructure. LedgerLens uses the `/api/audit-gate/p-check` and `/api/audit-gate/o-check` endpoints under David's `GEM2_API_KEY`. See the GEM² audit-gate API spec (available from GEM².AI) for the documented surface.
 - **Bright Data** APIs (SERP, Web Unlocker, Browser, MCP, Scraper) — proprietary Bright Data infrastructure, used under the participant terms of the Web Data UNLOCKED Hackathon.
 
 ## Post-hackathon references (NOT shipped in this repo)

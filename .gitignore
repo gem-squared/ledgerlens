@@ -1,13 +1,12 @@
 # LedgerLens — .gitignore
 
-# === GEM² / TPMN — mutable state ===
-.gem-squared/alarm.md
-.gem-squared/verify-work-logs/
-.gem-squared/truth-logs/
-.gem-squared/evidences/
+# === Session-level / TPMN governance — NEVER include in public repo ===
+.claude/
+.gem-squared/
+CLAUDE.md
 
-# === Claude Code local overrides ===
-.claude/settings.local.json
+# === Operational secrets (VPS topology, SSH keys, etc.) ===
+Docs/DEPLOY.md
 
 # === OS / editor ===
 .DS_Store
