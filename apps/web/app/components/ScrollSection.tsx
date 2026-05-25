@@ -1,8 +1,7 @@
 'use client';
 
 import { useRef } from 'react';
-import * as m from 'framer-motion/m';
-import { useScroll, useTransform } from 'framer-motion';
+import { motion, useScroll, useTransform } from 'framer-motion';
 import { fadeInUp } from '@/lib/motion';
 
 interface ScrollSectionProps {
@@ -19,7 +18,7 @@ export function ScrollSection({ id, children, speed = 1.0, className = '' }: Scr
   const y = useTransform(scrollYProgress, [0, 1], [0, speedOffset]);
 
   return (
-    <m.section
+    <motion.section
       ref={ref}
       id={id}
       className={`relative py-16 md:py-24 ${className}`}
@@ -28,11 +27,10 @@ export function ScrollSection({ id, children, speed = 1.0, className = '' }: Scr
       viewport={{ once: true, margin: '-50px' }}
       variants={fadeInUp}
       transition={{ duration: 0.6, ease: 'easeOut' }}
-      // @ts-expect-error -- framer-motion/m MotionValue type mismatch (known issue)
       style={{ y }}
       aria-label={id.replace(/-/g, ' ')}
     >
       {children}
-    </m.section>
+    </motion.section>
   );
 }
