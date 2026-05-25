@@ -1,3 +1,6 @@
+'use client';
+
+import * as m from 'framer-motion/m';
 import type { GateResponse } from '@/lib/types';
 import { dimensionLabel, parseReasons, scoreTone } from '@/lib/reasons';
 import { AuditScoreRing } from './AuditScoreRing';
@@ -117,7 +120,7 @@ function GateDimensions({ title, gate }: { title: string; gate?: GateResponse })
         <span className="font-mono text-zinc-500">composite {gate.score}/100</span>
       </h3>
       <ul className="space-y-2">
-        {parsed.dimensions.map((d) => {
+        {parsed.dimensions.map((d, idx) => {
           const tone = scoreTone(d.score);
           return (
             <li key={d.name}>
@@ -126,9 +129,11 @@ function GateDimensions({ title, gate }: { title: string; gate?: GateResponse })
                 <span className={`font-mono text-xs ${TONE_TEXT[tone]}`}>{d.score}</span>
               </div>
               <div className="mt-1 h-1.5 w-full overflow-hidden rounded-full bg-zinc-900">
-                <div
-                  className={`h-full ${TONE_BG[tone]} transition-all duration-700`}
-                  style={{ width: `${d.score}%` }}
+                <m.div
+                  className={`h-full ${TONE_BG[tone]}`}
+                  initial={{ width: '0%' }}
+                  animate={{ width: `${d.score}%` }}
+                  transition={{ duration: 0.7, ease: 'easeOut', delay: 0.05 * idx }}
                 />
               </div>
               {d.note && (

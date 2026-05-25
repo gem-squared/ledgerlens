@@ -1,17 +1,20 @@
+'use client';
+
+import * as m from 'framer-motion/m';
 import { scoreTone } from '@/lib/reasons';
 
 interface AuditScoreRingProps {
-  score: number;          // 0-100; pass NaN or negative for "skipped"
-  label: string;          // e.g. "L1 P-check"
-  verdict?: string;       // ALLOW / DENY / SUCCESS / FAILURE / "skipped"
-  size?: number;          // px (default 120)
-  subtle?: boolean;       // dim the ring (used for skipped gates)
+  score: number;
+  label: string;
+  verdict?: string;
+  size?: number;
+  subtle?: boolean;
 }
 
 const TONE_COLOR: Record<'good' | 'mid' | 'bad', string> = {
-  good: 'rgb(16, 185, 129)',  // emerald-500
-  mid:  'rgb(245, 158, 11)',  // amber-500
-  bad:  'rgb(239, 68, 68)',   // red-500
+  good: 'rgb(16, 185, 129)',
+  mid:  'rgb(245, 158, 11)',
+  bad:  'rgb(239, 68, 68)',
 };
 
 export function AuditScoreRing({
@@ -36,7 +39,6 @@ export function AuditScoreRing({
     <div className="inline-flex flex-col items-center">
       <div className="relative" style={{ width: size, height: size }}>
         <svg width={size} height={size} className="-rotate-90 transform">
-          {/* track */}
           <circle
             cx={c}
             cy={c}
@@ -45,18 +47,18 @@ export function AuditScoreRing({
             stroke="rgb(39, 39, 42)"
             strokeWidth={stroke}
           />
-          {/* progress */}
           {valid && (
-            <circle
+            <m.circle
               cx={c}
               cy={c}
               r={r}
               fill="none"
               stroke={strokeColor}
               strokeWidth={stroke}
-              strokeDasharray={`${dash} ${circumference - dash}`}
               strokeLinecap="round"
-              style={{ transition: 'stroke-dasharray 600ms ease-out' }}
+              initial={{ strokeDasharray: `0 ${circumference}` }}
+              animate={{ strokeDasharray: `${dash} ${circumference - dash}` }}
+              transition={{ duration: 1, ease: 'easeOut' }}
             />
           )}
         </svg>
