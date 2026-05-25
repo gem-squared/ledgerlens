@@ -1,4 +1,4 @@
-import type { BundleSummary, CaseListItem, RunResult, Stats } from './types';
+import type { BundleSummary, CaseListItem, DealRunResult, Stats } from './types';
 
 export async function listCases(): Promise<CaseListItem[]> {
   const r = await fetch('/api/v1/cases', { cache: 'no-store' });
@@ -7,7 +7,9 @@ export async function listCases(): Promise<CaseListItem[]> {
   return json.cases ?? [];
 }
 
-export async function runCase(id: string): Promise<RunResult> {
+// Case A/B replay shares the LIVE response shape (DealRunResult). The Go
+// handler synthesizes finalReport via agent.ComposeFromRequest.
+export async function runCase(id: string): Promise<DealRunResult> {
   const r = await fetch(`/api/v1/cases/${id}/run`, { method: 'POST', cache: 'no-store' });
   if (!r.ok) {
     const body = await r.text();
@@ -31,7 +33,9 @@ export async function listAuditBundles(): Promise<BundleSummary[]> {
   return json.bundles ?? [];
 }
 
-export async function getAuditBundle(decisionId: string): Promise<unknown> {
+// Bundle GET also returns a DealRunResult-shaped envelope (finalReport
+// synthesized on read, mode/durationMs derived from bundle metadata).
+export async function getAuditBundle(decisionId: string): Promise<DealRunResult> {
   const r = await fetch(`/api/v1/audit-bundles/${decisionId}`, { cache: 'no-store' });
   if (!r.ok) throw new Error(`getAuditBundle(${decisionId}): HTTP ${r.status}`);
   return r.json();

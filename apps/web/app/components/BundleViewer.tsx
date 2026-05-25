@@ -2,17 +2,20 @@
 
 import { useEffect, useState } from 'react';
 import { getAuditBundle } from '@/lib/api';
+import type { DealRunResult } from '@/lib/types';
+import { RichRunResult } from './RichRunResult';
 
 interface BundleViewerProps {
   decisionId: string;
   onClose: () => void;
 }
 
-// Modal-style overlay that fetches and renders the full audit bundle JSON
-// for a given decisionId. Used by Recent Activity's "View" button. No
-// portal — relies on absolute positioning + z-index.
+// Modal-style overlay that fetches a persisted audit bundle and renders it
+// using the same RichRunResult surface a fresh LIVE deal produces. The raw
+// JSON is preserved under a collapsible details block at the bottom of the
+// modal for judges who want forensic proof.
 export function BundleViewer({ decisionId, onClose }: BundleViewerProps) {
-  const [bundle, setBundle] = useState<unknown>(null);
+  const [bundle, setBundle] = useState<DealRunResult | null>(null);
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
@@ -39,15 +42,13 @@ export function BundleViewer({ decisionId, onClose }: BundleViewerProps) {
     return () => window.removeEventListener('keydown', onKey);
   }, [onClose]);
 
-  const formatted = bundle ? JSON.stringify(bundle, null, 2) : '';
-
   return (
     <div
       className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 p-4"
       onClick={onClose}
     >
       <div
-        className="relative max-h-[90vh] w-full max-w-3xl overflow-hidden rounded-xl border border-zinc-700 bg-zinc-950 shadow-2xl"
+        className="relative max-h-[90vh] w-full max-w-6xl overflow-hidden rounded-xl border border-zinc-700 bg-zinc-950 shadow-2xl"
         onClick={(e) => e.stopPropagation()}
       >
         <header className="flex items-center justify-between gap-3 border-b border-zinc-800 px-5 py-3">
@@ -84,11 +85,20 @@ export function BundleViewer({ decisionId, onClose }: BundleViewerProps) {
           {!error && !bundle && (
             <p className="text-xs text-zinc-500">Loading bundle…</p>
           )}
-          {bundle ? (
-            <pre className="overflow-x-auto whitespace-pre-wrap break-words font-mono text-[11px] leading-relaxed text-zinc-300">
-              {formatted}
-            </pre>
-          ) : null}
+          {bundle && (
+            <>
+              <RichRunResult result={bundle} />
+
+              <details className="mt-6 rounded-lg border border-zinc-800 bg-zinc-900/40">
+                <summary className="cursor-pointer select-none px-4 py-2 text-[11px] font-semibold uppercase tracking-wider text-zinc-400 hover:bg-zinc-900/60">
+                  Show raw audit-bundle JSON (forensic)
+                </summary>
+                <pre className="overflow-x-auto whitespace-pre-wrap break-words border-t border-zinc-800 p-4 font-mono text-[11px] leading-relaxed text-zinc-400">
+                  {JSON.stringify(bundle, null, 2)}
+                </pre>
+              </details>
+            </>
+          )}
         </div>
       </div>
     </div>

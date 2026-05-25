@@ -3,7 +3,10 @@ package main
 import (
 	"embed"
 	"io/fs"
+	"mime"
 	"net/http"
+	"path/filepath"
+	"strings"
 
 	"github.com/gin-gonic/gin"
 )
@@ -28,10 +31,17 @@ var staticFS embed.FS
 
 // mountStatic registers a NoRoute handler that serves the embedded UI.
 // It is wired AFTER all /api/* and /health routes so it does not shadow them.
+//
+// The handler reads bytes directly from the embed FS rather than delegating
+// to http.FileServer. FileServer issues canonical-URL redirects on paths
+// ending in "/index.html" (redirect target: "./") which produced an
+// infinite-redirect loop on any nested directory like /pitch/ — the SPA
+// fallback path set req.URL.Path="/index.html", FileServer redirected to
+// "./", browser resolved "./" against the ORIGINAL "/pitch/" and looped.
+// Direct read + write sidesteps the redirect dance entirely.
 func mountStatic(r *gin.Engine) {
 	sub, err := fs.Sub(staticFS, "web_static")
 	if err != nil {
-		// Build-time correctness — embed dir always exists; defensive.
 		r.NoRoute(devBannerHandler)
 		return
 	}
@@ -41,42 +51,80 @@ func mountStatic(r *gin.Engine) {
 		return
 	}
 
-	fileServer := http.FileServer(http.FS(sub))
 	r.NoRoute(func(c *gin.Context) {
 		req := c.Request
 		if req.Method != http.MethodGet && req.Method != http.MethodHead {
 			c.AbortWithStatus(http.StatusMethodNotAllowed)
 			return
 		}
-		// Force browsers to revalidate on every request — relevant while the
-		// hackathon UI is in active flux. Production-ready setting in §X
-		// would distinguish content-hashed /_next/static/* (immutable, long
-		// max-age) from index.html (no-cache). For now: blanket no-store
-		// keeps demos honest after every redeploy.
-		c.Writer.Header().Set("Cache-Control", "no-store, max-age=0, must-revalidate")
-		c.Writer.Header().Set("Pragma", "no-cache")
-		c.Writer.Header().Set("Expires", "0")
 
-		path := req.URL.Path
-		if path == "/" {
-			path = "/index.html"
+		urlPath := strings.TrimPrefix(req.URL.Path, "/")
+		if urlPath == "" {
+			urlPath = "index.html"
 		}
-		if _, err := fs.Stat(sub, path[1:]); err == nil {
-			fileServer.ServeHTTP(c.Writer, req)
+
+		// 1) Directory request (path ends with /): try <dir>/index.html
+		if strings.HasSuffix(urlPath, "/") {
+			candidate := urlPath + "index.html"
+			if _, err := fs.Stat(sub, candidate); err == nil {
+				serveStatic(c, sub, candidate)
+				return
+			}
+		}
+
+		// 2) Exact file
+		if _, err := fs.Stat(sub, urlPath); err == nil {
+			// If urlPath is a directory (no trailing slash), serve <dir>/index.html
+			info, _ := fs.Stat(sub, urlPath)
+			if info != nil && info.IsDir() {
+				if _, err := fs.Stat(sub, urlPath+"/index.html"); err == nil {
+					serveStatic(c, sub, urlPath+"/index.html")
+					return
+				}
+			} else {
+				serveStatic(c, sub, urlPath)
+				return
+			}
+		}
+
+		// 3) Try .html suffix (Next.js export: /case/a → /case/a.html)
+		if _, err := fs.Stat(sub, urlPath+".html"); err == nil {
+			serveStatic(c, sub, urlPath+".html")
 			return
 		}
-		// Try .html suffix (Next.js static export: /case/a → /case/a.html)
-		if _, err := fs.Stat(sub, path[1:]+".html"); err == nil {
-			req2 := *req
-			req2.URL.Path = path + ".html"
-			fileServer.ServeHTTP(c.Writer, &req2)
-			return
-		}
-		// SPA fallback
-		req3 := *req
-		req3.URL.Path = "/index.html"
-		fileServer.ServeHTTP(c.Writer, &req3)
+
+		// 4) SPA fallback — serve root index.html so client-side routes resolve
+		serveStatic(c, sub, "index.html")
 	})
+}
+
+// serveStatic reads name from the embed FS and writes it to the gin response.
+// No FileServer, no canonical-URL redirects. Sets cache headers + content-type.
+func serveStatic(c *gin.Context, sub fs.FS, name string) {
+	data, err := fs.ReadFile(sub, name)
+	if err != nil {
+		c.AbortWithStatus(http.StatusNotFound)
+		return
+	}
+	ct := mime.TypeByExtension(filepath.Ext(name))
+	if ct == "" {
+		ct = http.DetectContentType(data)
+	}
+	// Force browsers to revalidate on every request — relevant while the
+	// hackathon UI is in active flux. Production-ready setting would
+	// distinguish content-hashed /_next/static/* (immutable, long max-age)
+	// from index.html (no-cache); for now blanket no-store keeps demos
+	// honest after every redeploy.
+	c.Writer.Header().Set("Cache-Control", "no-store, max-age=0, must-revalidate")
+	c.Writer.Header().Set("Pragma", "no-cache")
+	c.Writer.Header().Set("Expires", "0")
+	c.Writer.Header().Set("Content-Type", ct)
+	if c.Request.Method == http.MethodHead {
+		c.Writer.WriteHeader(http.StatusOK)
+		return
+	}
+	c.Writer.WriteHeader(http.StatusOK)
+	_, _ = c.Writer.Write(data)
 }
 
 const devBannerHTML = `<!doctype html>

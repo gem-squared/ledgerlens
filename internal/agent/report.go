@@ -23,6 +23,20 @@ type FinalReport struct {
 
 const taglineCanonical = "Fast agents are dangerous if they spend before verification. LedgerLens deliberately waits."
 
+// ComposeFromRequest is a convenience for code paths that don't run through
+// Buyer Agent intent extraction (case replays + audit-bundle GET reads). It
+// derives a minimal BuyerIntent from the BuyerRequest and delegates to Compose.
+func ComposeFromRequest(
+	buyer schemas.BuyerRequest,
+	offer schemas.SellerOffer,
+	receipts []schemas.EvidenceReceipt,
+	decision schemas.DecisionPacket,
+	settlement schemas.SimulatedSettlement,
+) FinalReport {
+	intent := BuyerIntent{MaxSpendUSDC: buyer.MaxSpendUSDC}
+	return Compose(buyer.Query, intent, offer, receipts, decision, settlement)
+}
+
 // Compose builds the FinalReport from the orchestrator's outputs.
 func Compose(
 	judgeRequest string,

@@ -20,19 +20,6 @@ export interface CaseListItem {
   description: string;
 }
 
-export interface RunResult {
-  case: CaseListItem;
-  buyerRequest: BuyerRequest;
-  sellerOffer: SellerOffer;
-  evidenceReceipts: EvidenceReceipt[];
-  decision: DecisionPacket;
-  settlement: SimulatedSettlement;
-  l1?: GateResponse;
-  l2?: GateResponse;
-  bundlePath: string;
-  durationMs: number;
-}
-
 export interface GateResponse {
   verdict: string;
   score: number;

@@ -181,3 +181,34 @@ body {
 
 .ll-tile-pulsing { animation: ll-tile-pulse 1.4s ease-out; }
 .ll-num-bumping  { animation: ll-num-bump  0.9s ease-out; display: inline-block; }
+
+/* ── Attention-grab: animated gradient text for the "Sample requests"
+   label so judges notice the dropdown.  Subtle gray → indigo → gray
+   sweep across the letters, looping. */
+@keyframes ll-label-shimmer {
+  0%   { background-position:   0% 50%; }
+  100% { background-position: 200% 50%; }
+}
+.ll-attention-shimmer {
+  background-image: linear-gradient(
+    90deg,
+    rgb(113, 113, 122) 0%,    /* zinc-500 */
+    rgb(165, 180, 252) 50%,   /* indigo-300 — the attention bloom */
+    rgb(113, 113, 122) 100%   /* zinc-500 */
+  );
+  background-size: 200% auto;
+  background-clip: text;
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  animation: ll-label-shimmer 2.4s linear infinite;
+}
+
+/* Companion: bob the ✨ glyph next to the label */
+@keyframes ll-attention-bob {
+  0%, 100% { transform: translateY(0) rotate(0deg); }
+  50%      { transform: translateY(-2px) rotate(8deg); }
+}
+.ll-attention-bob {
+  display: inline-block;
+  animation: ll-attention-bob 1.6s ease-in-out infinite;
+}

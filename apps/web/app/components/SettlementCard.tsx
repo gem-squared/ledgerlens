@@ -4,9 +4,9 @@ export function SettlementCard({ settlement }: { settlement: SimulatedSettlement
   const settled = settlement.status === 'SIMULATED_SETTLED';
   return (
     <div className={`rounded-lg border ${settled ? 'border-emerald-500/30 bg-emerald-500/5' : 'border-zinc-700 bg-zinc-900/40'} p-4`}>
-      <div className="flex items-center justify-between">
+      <div className="flex flex-wrap items-center justify-between gap-x-3 gap-y-1">
         <h3 className="text-xs font-semibold uppercase tracking-wider text-zinc-400">x402 Settlement</h3>
-        <span className="inline-block rounded-full bg-simBadge px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider text-white">
+        <span className="inline-block whitespace-nowrap rounded-full bg-simBadge px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider text-white">
           SIMULATION MODE
         </span>
       </div>
