@@ -1,8 +1,7 @@
 'use client';
 
 import { useRef } from 'react';
-import { motion, useScroll, useTransform } from 'framer-motion';
-import { fadeInUp } from '@/lib/motion';
+import { motion, useScroll, useTransform, useInView } from 'framer-motion';
 
 interface ScrollSectionProps {
   id: string;
@@ -12,25 +11,27 @@ interface ScrollSectionProps {
 }
 
 export function ScrollSection({ id, children, speed = 1.0, className = '' }: ScrollSectionProps) {
-  const ref = useRef<HTMLElement>(null);
+  const ref = useRef<HTMLDivElement>(null);
+  const inView = useInView(ref, { once: true, margin: '-50px' });
   const { scrollYProgress } = useScroll({ target: ref, offset: ['start end', 'end start'] });
-  const speedOffset = (speed - 1) * 100;
+  const speedOffset = (speed - 1) * 150;
   const y = useTransform(scrollYProgress, [0, 1], [0, speedOffset]);
 
   return (
-    <motion.section
-      ref={ref}
+    <section
       id={id}
       className={`relative py-16 md:py-24 ${className}`}
-      initial="hidden"
-      whileInView="visible"
-      viewport={{ once: true, margin: '-50px' }}
-      variants={fadeInUp}
-      transition={{ duration: 0.6, ease: 'easeOut' }}
-      style={{ y }}
       aria-label={id.replace(/-/g, ' ')}
     >
-      {children}
-    </motion.section>
+      <motion.div
+        ref={ref}
+        style={{ y }}
+        className={`transition-all duration-700 ease-out ${
+          inView ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-10'
+        }`}
+      >
+        {children}
+      </motion.div>
+    </section>
   );
 }
