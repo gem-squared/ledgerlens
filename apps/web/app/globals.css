@@ -13,6 +13,49 @@ body {
   font-family: ui-sans-serif, system-ui, -apple-system, 'Segoe UI', sans-serif;
 }
 
+/* ── Ambient gradient mesh background ───────────────────────────────────── */
+
+.ll-bg {
+  position: fixed;
+  inset: 0;
+  z-index: -1;
+  overflow: hidden;
+}
+
+.ll-bg::before,
+.ll-bg::after {
+  content: '';
+  position: absolute;
+  border-radius: 50%;
+  filter: blur(100px);
+  opacity: 0.4;
+  animation: ll-drift 20s ease-in-out infinite alternate;
+}
+
+.ll-bg::before {
+  width: 700px;
+  height: 700px;
+  top: -20%;
+  left: -10%;
+  background: radial-gradient(circle, rgba(99, 102, 241, 0.7), transparent 60%);
+}
+
+.ll-bg::after {
+  width: 600px;
+  height: 600px;
+  bottom: -15%;
+  right: -10%;
+  background: radial-gradient(circle, rgba(16, 185, 129, 0.5), transparent 60%);
+  animation-delay: -10s;
+  animation-duration: 25s;
+}
+
+@keyframes ll-drift {
+  0%   { transform: translate(0, 0) scale(1); }
+  50%  { transform: translate(40px, 30px) scale(1.15); }
+  100% { transform: translate(-30px, 50px) scale(0.9); }
+}
+
 /* ── UI Upgrade: glass + glow utilities ─────────────────────────────────── */
 
 @layer utilities {
