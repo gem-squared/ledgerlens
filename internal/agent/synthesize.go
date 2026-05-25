@@ -85,9 +85,11 @@ Be FAITHFUL to the evidence:
 - If the evidence is stale, partial, or thin → your claim must reflect that limitation, not paper over it.
 - Do not invent capabilities the evidence does not mention.
 
+If MULTIPLE candidates appear in the evidence, choose the SINGLE most promising one for the buyer's intent and return EXACTLY ONE offer for it. Do not return arrays. Do not return multiple objects.
+
 The Trust Gate will audit the resulting claim against the evidence. Your job is fidelity, not flattery.
 
-Respond with valid JSON ONLY. No prose. No markdown fences.`
+Respond with EXACTLY ONE JSON OBJECT — no array brackets, no multiple objects, no prose, no markdown fences.`
 
 const synthesizeUserTmpl = `BUYER INTENT:
 %s
@@ -95,14 +97,14 @@ const synthesizeUserTmpl = `BUYER INTENT:
 EVIDENCE (each chunk is a header line + a public-web body excerpt):
 %s
 
-Construct a SellerOffer JSON matching what the evidence actually advertises:
+Construct EXACTLY ONE SellerOffer JSON object matching what the evidence advertises for the best candidate:
 {
   "claim": "<one sentence — what the provider would claim, faithful to the evidence>",
   "priceUSDC": <number — extract from evidence if visible, else use buyer.maxSpendUSDC * 0.5>,
-  "sourceUrl": "<most authoritative URL from the evidence>"
+  "sourceUrl": "<most authoritative URL from the evidence for the chosen candidate>"
 }
 
-JSON ONLY:`
+EXACTLY ONE OBJECT, JSON ONLY:`
 
 func randHex(n int) string {
 	b := make([]byte, n)

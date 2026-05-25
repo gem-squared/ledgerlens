@@ -5,11 +5,10 @@ import { runDealStream } from '@/lib/sse';
 import type { DealRunResult, RunMode, StepEvent } from '@/lib/types';
 import { AgentFlowTimeline } from './AgentFlowTimeline';
 import { FinalReportPanel } from './FinalReportPanel';
-import { DecisionBanner } from './DecisionBanner';
+import { AuditScoreCard } from './AuditScoreCard';
 import { ClaimAssessmentTable } from './ClaimAssessmentTable';
 import { SettlementCard } from './SettlementCard';
 import { EvidenceList } from './EvidenceList';
-import { ReasonChain } from './ReasonChain';
 
 const DEFAULT_QUERY =
   'Find a trustworthy live NYSE + NASDAQ market data provider under $0.001/query.';
@@ -207,34 +206,38 @@ export function JudgeRequestConsole() {
         </section>
       )}
 
-      {/* ── Final report + full audit panels ───────────────────────────── */}
+      {/* ── Layer 0: Final Report banner (always visible) ──────────────── */}
+      {/* ── Layer 1: Audit Score rings + Layer 2/3 drilldowns ──────────── */}
+      {/* ── Settlement + Evidence summaries ────────────────────────────── */}
       {result && (
         <>
           <FinalReportPanel report={result.finalReport} durationMs={result.durationMs} />
-          <DecisionBanner decision={result.decision} />
+
+          <AuditScoreCard l1={result.l1} l2={result.l2} />
 
           <div className="grid gap-6 lg:grid-cols-2">
-            <div className="space-y-4">
-              <div>
-                <h3 className="mb-2 text-xs font-semibold uppercase tracking-wider text-zinc-400">
-                  Bright Data Evidence ({result.evidenceReceipts?.length ?? 0} receipts)
-                </h3>
-                <EvidenceList receipts={result.evidenceReceipts} />
-              </div>
-              <SettlementCard settlement={result.settlement} />
-            </div>
-            <div className="space-y-4">
-              <ReasonChain title="L1 P-check (gem2-tpmn-checker)" response={result.l1} />
-              {result.l2 && <ReasonChain title="L2 O-check (gem2-tpmn-checker)" response={result.l2} />}
-            </div>
+            <SettlementCard settlement={result.settlement} />
+            <section className="rounded-xl border border-zinc-800 bg-zinc-900/30 p-5">
+              <h3 className="mb-3 flex items-baseline justify-between text-xs font-semibold uppercase tracking-wider text-zinc-300">
+                <span>Bright Data Evidence</span>
+                <span className="font-mono text-zinc-500">
+                  {result.evidenceReceipts?.length ?? 0} receipts
+                </span>
+              </h3>
+              <EvidenceList receipts={result.evidenceReceipts} />
+            </section>
           </div>
 
-          <div>
-            <h3 className="mb-2 text-xs font-semibold uppercase tracking-wider text-zinc-400">
-              Claim Assessments — canonical EEF (⊢ grounded · ⊨ inferred · ⊬ extrapolated · ⊥ unknown)
-            </h3>
-            <ClaimAssessmentTable claims={result.decision?.claimAssessments ?? []} />
-          </div>
+          {/* Technical details (claim assessments) — collapsed by default */}
+          <details className="group rounded-xl border border-zinc-800 bg-zinc-900/30 open:bg-zinc-900/40">
+            <summary className="cursor-pointer select-none list-none px-5 py-3 text-sm text-zinc-300 hover:bg-zinc-900/60">
+              <span className="inline-block w-4 text-zinc-500 transition-transform group-open:rotate-90">›</span>
+              Show claim-by-claim assessment ({result.decision?.claimAssessments?.length ?? 0} claims · canonical EEF tags)
+            </summary>
+            <div className="border-t border-zinc-800 p-5">
+              <ClaimAssessmentTable claims={result.decision?.claimAssessments ?? []} />
+            </div>
+          </details>
 
           <div className="flex flex-wrap gap-x-6 gap-y-1 text-xs text-zinc-500">
             <span>mode: <code>{result.mode}</code></span>

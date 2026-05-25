@@ -112,18 +112,19 @@ func snippet(b []byte) string {
 	return string(b)
 }
 
-// extractJSON strips common LLM JSON wrapping (markdown fences, leading prose)
-// and returns the first balanced JSON object in s. Defensive against models
-// that ignore "respond with only JSON" instructions.
+// extractJSON returns the FIRST balanced top-level JSON object in s.
+// Strips markdown fences, then walks character-by-character tracking
+// brace depth (skipping string contents) so multi-object responses
+// (e.g., model returns "{...},{...}") yield only the first object.
 func extractJSON(s string) string {
-	// Strip markdown fence
+	// Strip markdown fence wrappers if present.
 	for _, fence := range []string{"```json\n", "```\n", "```"} {
 		s = trimAround(s, fence)
 	}
-	// Find first { and last } — naive but robust enough for one-shot prompts.
+	// Find first '{'
 	start := -1
-	for i, r := range s {
-		if r == '{' {
+	for i := 0; i < len(s); i++ {
+		if s[i] == '{' {
 			start = i
 			break
 		}
@@ -131,17 +132,41 @@ func extractJSON(s string) string {
 	if start < 0 {
 		return s
 	}
-	end := -1
-	for i := len(s) - 1; i >= start; i-- {
-		if s[i] == '}' {
-			end = i
-			break
+	// Walk forward, tracking brace depth and string state, until we close
+	// the first object. Skip braces inside JSON strings.
+	depth := 0
+	inStr := false
+	escape := false
+	for i := start; i < len(s); i++ {
+		c := s[i]
+		if inStr {
+			if escape {
+				escape = false
+				continue
+			}
+			if c == '\\' {
+				escape = true
+				continue
+			}
+			if c == '"' {
+				inStr = false
+			}
+			continue
+		}
+		switch c {
+		case '"':
+			inStr = true
+		case '{':
+			depth++
+		case '}':
+			depth--
+			if depth == 0 {
+				return s[start : i+1]
+			}
 		}
 	}
-	if end < 0 {
-		return s
-	}
-	return s[start : end+1]
+	// Unclosed — return what we have for a clearer parse error.
+	return s[start:]
 }
 
 func trimAround(s, sub string) string {
