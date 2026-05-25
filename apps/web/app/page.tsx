@@ -3,7 +3,6 @@ import { StickyNav } from './components/StickyNav';
 import { ScrollSection } from './components/ScrollSection';
 import { HowItWorks } from './components/HowItWorks';
 import { DashboardShell } from './components/DashboardShell';
-import { CaseRunner } from './components/CaseRunner';
 
 export default function Home() {
   return (
@@ -33,9 +32,13 @@ export default function Home() {
       <ScrollSection id="settlement" speed={1.3}>
         <h2 className="section-heading">Settlement Simulation</h2>
         <p className="section-sub">
-          Deterministic replay — fixed BLOCKED / APPROVED outcomes for demo safety.
+          Run a deal above to see the x402-shaped settlement — the trust gate is real.
         </p>
-        <CaseRunner />
+        <div className="glass-panel text-center py-12">
+          <p className="text-zinc-400 text-sm">
+            Settlement results appear here after running an autonomous deal in the section above.
+          </p>
+        </div>
       </ScrollSection>
 
       <footer className="py-12 border-t border-white/[0.08] text-xs text-zinc-500 text-center">
