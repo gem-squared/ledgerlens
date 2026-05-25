@@ -25,10 +25,11 @@ export function ScrollSection({ id, children, speed = 1.0, className = '' }: Scr
       className={`relative py-16 md:py-24 ${className}`}
       initial="hidden"
       whileInView="visible"
-      viewport={{ once: false, amount: 0.3 }}
+      viewport={{ once: true, amount: 0.3 }}
       variants={fadeInUp}
       transition={{ duration: 0.6, ease: 'easeOut' }}
-      style={{ y: y as unknown as number }}
+      // @ts-expect-error -- framer-motion/m MotionValue type mismatch (known issue)
+      style={{ y }}
       aria-label={id.replace(/-/g, ' ')}
     >
       {children}

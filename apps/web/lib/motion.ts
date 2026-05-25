@@ -29,7 +29,3 @@ export const fadeInUp: Variants = {
   visible: { opacity: 1, y: 0 },
 };
 
-export const fadeOut: Variants = {
-  visible: { opacity: 1 },
-  hidden: { opacity: 0.3 },
-};

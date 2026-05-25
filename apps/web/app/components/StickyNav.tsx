@@ -26,7 +26,7 @@ export function StickyNav() {
           }
         }
       },
-      { threshold: 0.3 }
+      { threshold: [0, 0.3] }
     );
 
     if (hero) observer.observe(hero);
