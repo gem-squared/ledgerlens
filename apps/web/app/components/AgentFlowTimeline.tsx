@@ -2,6 +2,8 @@
 
 import { useEffect, useRef, useState } from 'react';
 import type { StepEvent, StepStatus, RunMode } from '@/lib/types';
+import * as m from 'framer-motion/m';
+import { SPRING_SNAPPY } from '@/lib/motion';
 
 // ── Step catalog ──────────────────────────────────────────────────────────
 // id MUST match the backend's StepEvent.step exactly (see internal/api/deals_stream.go).
@@ -217,6 +219,10 @@ export function AgentFlowTimeline(props: AgentFlowTimelineProps) {
             style={{ width: `${(globalSynthetic * 100).toFixed(2)}%` }}
           />
         </div>
+        <div
+          className="mt-1 h-1 w-full rounded-full glow-indigo transition-opacity duration-300"
+          style={{ opacity: done ? 0 : globalSynthetic * 0.6 }}
+        />
         {showHeartbeat && (
           <div className="flex items-center gap-2 text-xs text-zinc-400">
             <span className="ll-active inline-block h-2 w-2 rounded-full bg-simBadge" />
@@ -279,6 +285,7 @@ interface StepCardProps {
 
 function StepCard({ index, title, label, status, isActive, activeFrac }: StepCardProps) {
   let bg = 'bg-zinc-900/40 border-zinc-800';
+  let glow = '';
   let iconBg = 'bg-zinc-800 text-zinc-500';
   let iconChar = String(index);
   let labelClass = 'text-zinc-500';
@@ -286,6 +293,7 @@ function StepCard({ index, title, label, status, isActive, activeFrac }: StepCar
   switch (status) {
     case 'running':
       bg = 'bg-indigo-500/5 border-indigo-500/40';
+      glow = 'glow-indigo';
       iconBg = 'bg-indigo-500 text-white';
       iconChar = '▸';
       labelClass = 'text-zinc-200';
@@ -293,6 +301,7 @@ function StepCard({ index, title, label, status, isActive, activeFrac }: StepCar
     case 'passed':
     case 'settled':
       bg = 'bg-emerald-500/5 border-emerald-500/30';
+      glow = 'glow-green';
       iconBg = 'bg-emerald-500 text-white';
       iconChar = '✓';
       labelClass = 'text-zinc-300';
@@ -300,6 +309,7 @@ function StepCard({ index, title, label, status, isActive, activeFrac }: StepCar
     case 'blocked':
     case 'failed':
       bg = 'bg-red-500/10 border-red-500/40';
+      glow = 'glow-red';
       iconBg = 'bg-red-500 text-white';
       iconChar = '✕';
       labelClass = 'text-red-200';
@@ -328,15 +338,24 @@ function StepCard({ index, title, label, status, isActive, activeFrac }: StepCar
   }
 
   return (
-    <div className={`relative overflow-hidden rounded-lg border ${bg} px-4 py-3 transition-all duration-300`}>
+    <m.div
+      className={`relative overflow-hidden rounded-lg border ${bg} ${glow} px-4 py-3`}
+      animate={{
+        scale: isActive ? 1.02 : 1,
+        x: status === 'blocked' || status === 'failed' ? [-4, 4, -3, 3, 0] : 0,
+      }}
+      transition={isActive ? { scale: { ...SPRING_SNAPPY } } : { duration: 0.3 }}
+    >
       <div className="flex items-center gap-3">
-        <span
+        <m.span
           className={`flex h-7 w-7 shrink-0 items-center justify-center rounded-full text-xs font-bold ${iconBg} ${
             isActive ? 'll-active' : ''
           }`}
+          animate={TERMINAL_STATUSES.has(status) ? { scale: [1.3, 1] } : {}}
+          transition={SPRING_SNAPPY}
         >
           {iconChar}
-        </span>
+        </m.span>
         <div className="min-w-0 flex-1">
           <div className="text-xs uppercase tracking-wider text-zinc-500">{title}</div>
           <div className={`truncate text-sm ${labelClass}`}>{label}</div>
@@ -361,6 +380,6 @@ function StepCard({ index, title, label, status, isActive, activeFrac }: StepCar
 
       {/* Shimmer overlay only on active step */}
       {isActive && <div className="pointer-events-none absolute inset-0 ll-shimmer" />}
-    </div>
+    </m.div>
   );
 }
