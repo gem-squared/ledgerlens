@@ -48,7 +48,7 @@ export function BundleViewer({ decisionId, onClose }: BundleViewerProps) {
       onClick={onClose}
     >
       <div
-        className="relative max-h-[90vh] w-full max-w-5xl overflow-hidden rounded-xl border border-zinc-700 bg-zinc-950 shadow-2xl"
+        className="relative max-h-[90vh] w-full max-w-6xl overflow-hidden rounded-xl border border-zinc-700 bg-zinc-950 shadow-2xl"
         onClick={(e) => e.stopPropagation()}
       >
         <header className="flex items-center justify-between gap-3 border-b border-zinc-800 px-5 py-3">
