@@ -37,6 +37,9 @@ func (s *Server) RegisterRoutes(g *gin.RouterGroup) {
 	g.POST("/deals/run", s.runDeal)
 	// Slice 2 — SSE streaming endpoint (same body, text/event-stream response)
 	g.POST("/deals/run-stream", s.runDealStream)
+	// Slice 3 (Verification Infrastructure Dashboard) — aggregate stats + bundle list
+	g.GET("/stats", s.getStats)
+	g.GET("/audit-bundles", s.listAuditBundles)
 }
 
 // CaseListItem is the JSON shape for GET /cases.

@@ -119,3 +119,47 @@ export interface StepEvent {
 }
 
 export type RunMode = 'live' | 'prewarmed' | 'replay';
+
+// ─── Slice 3: Verification Infrastructure Dashboard ────────────────────────
+
+export interface Modes {
+  live: number;
+  preWarmed: number;
+  replay: number;
+  unknown: number;
+}
+
+export interface Stats {
+  dealsAudited: number;
+  approved: number;
+  blocked: number;
+  escalatedToHuman: number;
+  avgAuditScore: number;
+  avgVerificationLatencyMs: number;
+  simulatedSpendPreventedUSDC: number;
+  brightDataReceipts: number;
+  auditBundlesExported: number;
+  sampleSize: number;
+  lastUpdatedAt?: string;
+  auditGateUrl: string;
+  auditGateAvgLatencyMs: number;
+  modesBreakdown: Modes;
+}
+
+export interface BundleSummary {
+  decisionId: string;
+  bundleId: string;
+  verdict: string;
+  mode: string;
+  query: string;
+  durationMs: number;
+  l1Score: number;
+  l2Score?: number;
+  l2Skipped: boolean;
+  paymentAllowed: boolean;
+  settlementStatus?: string;
+  settlementId?: string;
+  amountUSDC: number;
+  createdAt: string;
+  evidenceCount: number;
+}

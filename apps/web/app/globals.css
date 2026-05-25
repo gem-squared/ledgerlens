@@ -65,3 +65,20 @@ body {
   background-size: 200% 100%;
   animation: ll-bar-glide 2.5s ease-in-out infinite;
 }
+
+/* ── Slice 3: dashboard tile pulse on metric change ─────────────────────── */
+
+@keyframes ll-tile-pulse {
+  0%   { background-color: rgba(99, 102, 241, 0.00); box-shadow: 0 0 0 0 rgba(99,102,241,0.0); }
+  15%  { background-color: rgba(99, 102, 241, 0.22); box-shadow: 0 0 0 6px rgba(99,102,241,0.18); }
+  100% { background-color: rgba(99, 102, 241, 0.00); box-shadow: 0 0 0 0 rgba(99,102,241,0.0); }
+}
+
+@keyframes ll-num-bump {
+  0%   { transform: scale(1.00); color: rgb(244, 244, 245); }
+  20%  { transform: scale(1.10); color: rgb(165, 180, 252); }
+  100% { transform: scale(1.00); color: rgb(244, 244, 245); }
+}
+
+.ll-tile-pulsing { animation: ll-tile-pulse 1.4s ease-out; }
+.ll-num-bumping  { animation: ll-num-bump  0.9s ease-out; display: inline-block; }

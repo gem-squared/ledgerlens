@@ -13,7 +13,12 @@ import { EvidenceList } from './EvidenceList';
 const DEFAULT_QUERY =
   'Find a trustworthy live NYSE + NASDAQ market data provider under $0.001/query.';
 
-export function JudgeRequestConsole() {
+interface JudgeRequestConsoleProps {
+  /** Called when a run completes (success or error) so the dashboard can refetch. */
+  onRunComplete?: () => void;
+}
+
+export function JudgeRequestConsole({ onRunComplete }: JudgeRequestConsoleProps = {}) {
   const [query, setQuery] = useState(DEFAULT_QUERY);
   const [mode, setMode] = useState<RunMode>('live');
   const [running, setRunning] = useState(false);
@@ -68,6 +73,8 @@ export function JudgeRequestConsole() {
         onResult: (r) => {
           setResult(r);
           setRunning(false);
+          // Tell the dashboard a new audit bundle exists → refetch counters.
+          onRunComplete?.();
         },
         onError: (err) => {
           // Parse off_domain rejection from the JSON path (race condition guard)
