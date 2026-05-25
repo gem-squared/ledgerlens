@@ -3,7 +3,7 @@
 import { useRef } from 'react';
 import * as m from 'framer-motion/m';
 import { useScroll, useTransform } from 'framer-motion';
-import { fadeInUp, SPRING_GENTLE } from '@/lib/motion';
+import { fadeInUp } from '@/lib/motion';
 
 interface ScrollSectionProps {
   id: string;
@@ -25,7 +25,7 @@ export function ScrollSection({ id, children, speed = 1.0, className = '' }: Scr
       className={`relative py-16 md:py-24 ${className}`}
       initial="hidden"
       whileInView="visible"
-      viewport={{ once: true, amount: 0.3 }}
+      viewport={{ once: true, margin: '-50px' }}
       variants={fadeInUp}
       transition={{ duration: 0.6, ease: 'easeOut' }}
       // @ts-expect-error -- framer-motion/m MotionValue type mismatch (known issue)
