@@ -158,7 +158,7 @@ export function JudgeRequestConsole({ onRunComplete }: JudgeRequestConsoleProps 
             type="button"
             onClick={onRun}
             disabled={running || mode === 'replay' || !query.trim()}
-            className="rounded-md bg-simBadge px-5 py-2.5 text-sm font-semibold text-white shadow-md hover:bg-indigo-500 disabled:cursor-not-allowed disabled:opacity-40"
+            className="glass-btn"
           >
             {running ? 'Verifying…' : '▸ Run Autonomous Deal'}
           </button>

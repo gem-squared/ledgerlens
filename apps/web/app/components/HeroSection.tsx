@@ -65,6 +65,24 @@ export function HeroSection() {
           L3 releases or blocks simulated payment.
         </PillarCard>
       </m.div>
+
+      {/* Scroll indicator */}
+      <m.div
+        className="mt-10 flex justify-center"
+        variants={fadeUp}
+        transition={{ delay: 0.8 }}
+      >
+        <button
+          type="button"
+          onClick={() => document.getElementById('how-it-works')?.scrollIntoView({ behavior: 'smooth' })}
+          className="text-zinc-500 hover:text-zinc-300 transition-colors animate-bounce"
+          aria-label="Scroll to content"
+        >
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+            <path d="M7 13l5 5 5-5M7 6l5 5 5-5" />
+          </svg>
+        </button>
+      </m.div>
     </m.header>
   );
 }
