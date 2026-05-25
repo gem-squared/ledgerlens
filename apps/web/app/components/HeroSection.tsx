@@ -1,7 +1,21 @@
+'use client';
+
+import * as m from 'framer-motion/m';
+import { SPRING_GENTLE, fadeUp, staggerContainer } from '@/lib/motion';
+
 export function HeroSection() {
   return (
-    <header className="mb-8">
-      <div className="flex flex-wrap items-baseline justify-between gap-4">
+    <m.header
+      className="mb-8"
+      initial="hidden"
+      animate="visible"
+      variants={staggerContainer}
+    >
+      <m.div
+        className="flex flex-wrap items-baseline justify-between gap-4"
+        variants={fadeUp}
+        transition={{ duration: 0.5 }}
+      >
         <div>
           <span className="inline-block rounded-full bg-simBadge px-3 py-1 text-xs font-semibold uppercase tracking-wider text-white">
             Simulation Mode
@@ -15,21 +29,32 @@ export function HeroSection() {
         >
           source ↗
         </a>
-      </div>
+      </m.div>
 
-      <p className="mt-4 max-w-3xl text-sm text-zinc-400">
+      <m.p
+        className="mt-4 max-w-3xl text-sm text-zinc-400"
+        variants={fadeUp}
+        transition={{ duration: 0.4 }}
+      >
         LedgerLens is a trust-gated commerce layer for autonomous agents. A buyer agent
         interprets the judge&apos;s request, Bright Data collects public evidence, and GEM²
         audits the seller&apos;s claim before any payment is allowed. Settlement is x402-shaped
         simulation: the trust gate is real.
-      </p>
+      </m.p>
 
-      <p className="mt-3 max-w-3xl text-sm italic text-zinc-300">
+      <m.p
+        className="mt-3 max-w-3xl text-sm italic text-zinc-300"
+        variants={fadeUp}
+        transition={{ duration: 0.4 }}
+      >
         Fast agents are dangerous if they spend before verification. LedgerLens deliberately waits.
-      </p>
+      </m.p>
 
       {/* Three product pillars */}
-      <div className="mt-5 grid gap-3 sm:grid-cols-3">
+      <m.div
+        className="mt-5 grid gap-3 sm:grid-cols-3"
+        variants={staggerContainer}
+      >
         <PillarCard title="Bright Data Evidence">
           SERP + Unlocker + Browser + MCP collect public-web proof.
         </PillarCard>
@@ -39,18 +64,22 @@ export function HeroSection() {
         <PillarCard title="x402 Settlement">
           L3 releases or blocks simulated payment.
         </PillarCard>
-      </div>
-    </header>
+      </m.div>
+    </m.header>
   );
 }
 
 function PillarCard({ title, children }: { title: string; children: React.ReactNode }) {
   return (
-    <div className="rounded-lg border border-zinc-800 bg-zinc-900/40 p-3">
+    <m.div
+      className="rounded-lg border border-zinc-800 bg-zinc-900/40 p-3"
+      variants={fadeUp}
+      transition={SPRING_GENTLE}
+    >
       <div className="text-xs font-semibold uppercase tracking-wider text-zinc-500">
         {title}
       </div>
       <p className="mt-1 text-sm leading-relaxed text-zinc-300">{children}</p>
-    </div>
+    </m.div>
   );
 }

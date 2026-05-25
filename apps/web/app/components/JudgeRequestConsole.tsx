@@ -9,6 +9,7 @@ import { AuditScoreCard } from './AuditScoreCard';
 import { ClaimAssessmentTable } from './ClaimAssessmentTable';
 import { SettlementCard } from './SettlementCard';
 import { EvidenceList } from './EvidenceList';
+import { VerdictReveal } from './VerdictReveal';
 
 const DEFAULT_QUERY =
   'Find a trustworthy live NYSE + NASDAQ market data provider under $0.001/query.';
@@ -218,6 +219,13 @@ export function JudgeRequestConsole({ onRunComplete }: JudgeRequestConsoleProps 
       {/* ── Settlement + Evidence summaries ────────────────────────────── */}
       {result && (
         <>
+          <VerdictReveal
+            verdict={
+              result.decision?.verdict === 'APPROVED_BY_TRUST_GATE'
+                ? 'approved'
+                : 'blocked'
+            }
+          />
           <FinalReportPanel report={result.finalReport} durationMs={result.durationMs} />
 
           <AuditScoreCard l1={result.l1} l2={result.l2} />

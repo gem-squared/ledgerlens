@@ -51,14 +51,14 @@ export function StatsDashboard({ refreshTrigger }: StatsDashboardProps) {
 
   if (!stats) {
     return (
-      <section className="rounded-xl border border-zinc-800 bg-zinc-900/40 p-5">
+      <section className="glass p-5">
         <p className="text-xs text-zinc-500">Loading verification infrastructure metrics…</p>
       </section>
     );
   }
 
   return (
-    <section className="rounded-xl border border-zinc-800 bg-zinc-900/40 p-5">
+    <section className="glass p-5">
       <div className="mb-4 flex flex-wrap items-baseline justify-between gap-3">
         <h2 className="text-xs font-semibold uppercase tracking-wider text-zinc-300">
           Verification Infrastructure Dashboard
@@ -153,11 +153,18 @@ interface TileProps {
 
 function Tile({ id, label, value, sub, pulsing }: TileProps) {
   const isPulsing = pulsing.has(id);
+  const glowClass = isPulsing
+    ? id === 'split' || id === 'simulatedSpendPreventedUSDC'
+      ? 'glow-red'
+      : id === 'avgAuditScore'
+        ? 'glow-green'
+        : 'glow-indigo'
+    : '';
   return (
     <div
-      className={`rounded-lg border border-zinc-800 bg-zinc-950 p-3 transition ${
+      className={`glass p-3 transition ${
         isPulsing ? 'll-tile-pulsing' : ''
-      }`}
+      } ${glowClass}`}
     >
       <div className="text-[10px] font-semibold uppercase tracking-wider text-zinc-500">
         {label}
