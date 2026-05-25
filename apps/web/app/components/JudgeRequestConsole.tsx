@@ -164,8 +164,12 @@ export function JudgeRequestConsole({ onRunComplete }: JudgeRequestConsoleProps 
         {mode !== 'replay' && (
           <>
             <div className="mb-2 flex items-center gap-2">
-              <label htmlFor="sample-picker" className="text-[11px] uppercase tracking-wider text-zinc-500">
-                Sample requests
+              <label
+                htmlFor="sample-picker"
+                className="flex items-center gap-1 whitespace-nowrap text-[11px] font-semibold uppercase tracking-wider"
+              >
+                <span className="ll-attention-bob" aria-hidden>✨</span>
+                <span className="ll-attention-shimmer">Sample requests</span>
               </label>
               <select
                 id="sample-picker"
