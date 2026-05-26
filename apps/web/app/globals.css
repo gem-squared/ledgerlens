@@ -83,33 +83,45 @@ body {
 .ll-tile-pulsing { animation: ll-tile-pulse 1.4s ease-out; }
 .ll-num-bumping  { animation: ll-num-bump  0.9s ease-out; display: inline-block; }
 
-/* ── Attention-grab: animated gradient text for the "Sample requests"
-   label so judges notice the dropdown.  Subtle gray → indigo → gray
-   sweep across the letters, looping. */
+/* ── Attention-grab: animated gradient text + glow for the "Sample
+   requests" label so judges notice the dropdown.  Brighter indigo +
+   violet + sky bloom, faster sweep, soft drop-shadow glow pulse.
+   Stops once the judge interacts (handled in React by removing the
+   class on first focus/mousedown/change). */
 @keyframes ll-label-shimmer {
   0%   { background-position:   0% 50%; }
   100% { background-position: 200% 50%; }
 }
+@keyframes ll-label-glow {
+  0%, 100% { filter: drop-shadow(0 0 0px rgba(165,180,252,0)); }
+  50%      { filter: drop-shadow(0 0 6px rgba(165,180,252,0.75)); }
+}
 .ll-attention-shimmer {
   background-image: linear-gradient(
     90deg,
-    rgb(113, 113, 122) 0%,    /* zinc-500 */
-    rgb(165, 180, 252) 50%,   /* indigo-300 — the attention bloom */
-    rgb(113, 113, 122) 100%   /* zinc-500 */
+    rgb(148, 163, 184) 0%,    /* slate-400 — base */
+    rgb(196, 181, 253) 45%,   /* violet-300 — bloom A */
+    rgb(125, 211, 252) 55%,   /* sky-300    — bloom B */
+    rgb(148, 163, 184) 100%   /* slate-400 — base */
   );
-  background-size: 200% auto;
+  background-size: 240% auto;
   background-clip: text;
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
-  animation: ll-label-shimmer 2.4s linear infinite;
+  animation:
+    ll-label-shimmer 1.4s linear infinite,
+    ll-label-glow    2.0s ease-in-out infinite;
 }
 
-/* Companion: bob the ✨ glyph next to the label */
+/* Companion: bob + flip + glow the ✨ glyph next to the label */
 @keyframes ll-attention-bob {
-  0%, 100% { transform: translateY(0) rotate(0deg); }
-  50%      { transform: translateY(-2px) rotate(8deg); }
+  0%, 100% { transform: translateY(0)    rotate(0deg)   scale(1);    }
+  25%      { transform: translateY(-3px) rotate(-12deg) scale(1.10); }
+  50%      { transform: translateY(-5px) rotate(14deg)  scale(1.18); }
+  75%      { transform: translateY(-2px) rotate(-8deg)  scale(1.08); }
 }
 .ll-attention-bob {
   display: inline-block;
-  animation: ll-attention-bob 1.6s ease-in-out infinite;
+  animation: ll-attention-bob 1.4s ease-in-out infinite;
+  filter: drop-shadow(0 0 6px rgba(250,204,21,0.55));
 }

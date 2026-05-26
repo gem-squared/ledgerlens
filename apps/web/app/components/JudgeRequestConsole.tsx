@@ -53,6 +53,12 @@ export function JudgeRequestConsole({ onRunComplete }: JudgeRequestConsoleProps 
   const [politeReject, setPoliteReject] = useState<string | null>(null);
   const [cases, setCases] = useState<CaseListItem[]>([]);
 
+  // The sample-picker dropdown animates a typing placeholder until the
+  // judge interacts with it (focus / mousedown / change). After that,
+  // animation stops permanently.
+  const [sampleInteracted, setSampleInteracted] = useState(false);
+  const sampleSelectRef = useRef<HTMLSelectElement | null>(null);
+
   const abortRef = useRef<AbortController | null>(null);
 
   // Force a re-render every 250ms while running, so the elapsed-time
@@ -70,6 +76,57 @@ export function JudgeRequestConsole({ onRunComplete }: JudgeRequestConsoleProps 
       console.error('listCases failed', err);
     });
   }, []);
+
+  // Typing-effect placeholder on the sample-picker dropdown. Mutates
+  // the first <option>'s visible text char-by-char with a blinking
+  // caret until the judge interacts. Native <select> placeholder text
+  // can't be animated any other way; this is the canonical trick.
+  useEffect(() => {
+    if (sampleInteracted) return;
+    if (mode === 'replay') return; // dropdown only renders in LIVE/PRE-WARMED
+    const select = sampleSelectRef.current;
+    if (!select || !select.options[0]) return;
+
+    const fullText = '▾ Pick a sample request — judge can edit before running';
+    let charIndex = 0;
+    let cancelled = false;
+    let timer: ReturnType<typeof setTimeout> | null = null;
+
+    const tick = () => {
+      if (cancelled) return;
+      charIndex++;
+      if (charIndex > fullText.length) {
+        // Pause at full text, then restart from the beginning.
+        timer = setTimeout(() => {
+          if (cancelled) return;
+          charIndex = 0;
+          tick();
+        }, 1800);
+        return;
+      }
+      if (select.options[0]) {
+        // Alternate caret visibility for a blink without an extra timer.
+        const caret = charIndex % 2 === 0 ? '▌' : ' ';
+        select.options[0].text = fullText.substring(0, charIndex) + caret;
+      }
+      timer = setTimeout(tick, 55);
+    };
+    tick();
+
+    return () => {
+      cancelled = true;
+      if (timer) clearTimeout(timer);
+      // Restore the full descriptive text so the open dropdown reads cleanly.
+      if (select.options[0]) {
+        select.options[0].text =
+          '▾ Pick a sample request (populates the textarea — judge can edit before running)';
+      }
+    };
+  }, [sampleInteracted, mode]);
+
+  const stopSampleAnimation = () => {
+    if (!sampleInteracted) setSampleInteracted(true);
+  };
 
   function reset() {
     setEvents([]);
@@ -168,14 +225,23 @@ export function JudgeRequestConsole({ onRunComplete }: JudgeRequestConsoleProps 
                 htmlFor="sample-picker"
                 className="flex items-center gap-1 whitespace-nowrap text-[11px] font-semibold uppercase tracking-wider"
               >
-                <span className="ll-attention-bob" aria-hidden>✨</span>
-                <span className="ll-attention-shimmer">Sample requests</span>
+                <span
+                  className={sampleInteracted ? 'inline-block' : 'll-attention-bob'}
+                  aria-hidden
+                >✨</span>
+                <span
+                  className={sampleInteracted ? 'text-zinc-500' : 'll-attention-shimmer'}
+                >Sample requests</span>
               </label>
               <select
+                ref={sampleSelectRef}
                 id="sample-picker"
                 disabled={running}
                 value=""
+                onFocus={stopSampleAnimation}
+                onMouseDown={stopSampleAnimation}
                 onChange={(e) => {
+                  stopSampleAnimation();
                   const pick = SAMPLE_QUERIES.find((s) => s.label === e.target.value);
                   if (pick) setQuery(pick.query);
                   // Reset back to placeholder so re-picking the same item still fires onChange.
