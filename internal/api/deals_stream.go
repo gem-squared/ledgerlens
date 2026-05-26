@@ -121,7 +121,26 @@ func (s *Server) runDealStream(c *gin.Context) {
 			return
 		case e, more := <-events:
 			if !more {
-				// goroutine finished — drain result or error
+				// goroutine finished — drain result or error.
+				//
+				// Race fix: the goroutine sends `resultCh <- result` BEFORE its
+				// `defer close(events)` fires. By the time we arrive here, both
+				// channels can be simultaneously ready (events closed + resultCh
+				// holding the value). Go's select picks uniformly at random,
+				// so on some runs we drop into this branch BEFORE the resultCh
+				// case ever fired — pendingResult is still false even though
+				// the result is sitting in the channel waiting to be received.
+				// Final non-blocking drain catches that case.
+				if !pendingResult {
+					select {
+					case r, ok := <-resultCh:
+						if ok {
+							finalResult = r
+							pendingResult = true
+						}
+					default:
+					}
+				}
 				if pendingResult {
 					writeResult(finalResult)
 				}
