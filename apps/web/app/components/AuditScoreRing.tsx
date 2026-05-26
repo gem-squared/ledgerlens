@@ -1,6 +1,6 @@
 'use client';
 
-import * as m from 'framer-motion/m';
+import { motion } from 'framer-motion';
 import { scoreTone } from '@/lib/reasons';
 
 interface AuditScoreRingProps {
@@ -48,7 +48,7 @@ export function AuditScoreRing({
             strokeWidth={stroke}
           />
           {valid && (
-            <m.circle
+            <motion.circle
               cx={c}
               cy={c}
               r={r}

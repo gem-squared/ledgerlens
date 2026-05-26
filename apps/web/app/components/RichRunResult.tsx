@@ -22,7 +22,7 @@ export function RichRunResult({ result }: { result: DealRunResult }) {
 
       <div className="grid gap-6 lg:grid-cols-2">
         <SettlementCard settlement={result.settlement} />
-        <section className="rounded-xl border border-zinc-800 bg-zinc-900/30 p-5">
+        <section className="glass-panel">
           <h3 className="mb-3 flex items-baseline justify-between text-xs font-semibold uppercase tracking-wider text-zinc-300">
             <span>Bright Data Evidence</span>
             <span className="font-mono text-zinc-500">
@@ -33,7 +33,7 @@ export function RichRunResult({ result }: { result: DealRunResult }) {
         </section>
       </div>
 
-      <details className="group rounded-xl border border-zinc-800 bg-zinc-900/30 open:bg-zinc-900/40">
+      <details className="group glass-panel open:bg-white/[0.1]">
         <summary className="cursor-pointer select-none list-none px-5 py-3 text-sm text-zinc-300 hover:bg-zinc-900/60">
           <span className="inline-block w-4 text-zinc-500 transition-transform group-open:rotate-90">›</span>
           Show claim-by-claim assessment ({result.decision?.claimAssessments?.length ?? 0} claims · canonical EEF tags)

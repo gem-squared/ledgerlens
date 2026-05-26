@@ -1,17 +1,17 @@
 'use client';
 
-import * as m from 'framer-motion/m';
+import { motion } from 'framer-motion';
 import { SPRING_GENTLE, fadeUp, staggerContainer } from '@/lib/motion';
 
 export function HeroSection() {
   return (
-    <m.header
+    <motion.header
       className="mb-8"
       initial="hidden"
       animate="visible"
       variants={staggerContainer}
     >
-      <m.div
+      <motion.div
         className="flex flex-wrap items-baseline justify-between gap-4"
         variants={fadeUp}
         transition={{ duration: 0.5 }}
@@ -38,9 +38,9 @@ export function HeroSection() {
         >
           source ↗
         </a>
-      </m.div>
+      </motion.div>
 
-      <m.p
+      <motion.p
         className="mt-4 max-w-3xl text-sm text-zinc-400"
         variants={fadeUp}
         transition={{ duration: 0.4 }}
@@ -49,18 +49,18 @@ export function HeroSection() {
         interprets the judge&apos;s request, Bright Data collects public evidence, and GEM²
         audits the seller&apos;s claim before any payment is allowed. Settlement is x402-shaped
         simulation: the trust gate is real.
-      </m.p>
+      </motion.p>
 
-      <m.p
+      <motion.p
         className="mt-3 max-w-3xl text-sm italic text-zinc-300"
         variants={fadeUp}
         transition={{ duration: 0.4 }}
       >
         Fast agents are dangerous if they spend before verification. LedgerLens deliberately waits.
-      </m.p>
+      </motion.p>
 
       {/* Three product pillars */}
-      <m.div
+      <motion.div
         className="mt-5 grid gap-3 sm:grid-cols-3"
         variants={staggerContainer}
       >
@@ -73,10 +73,10 @@ export function HeroSection() {
         <PillarCard title="x402 Settlement">
           L3 releases or blocks simulated payment.
         </PillarCard>
-      </m.div>
+      </motion.div>
 
       {/* Scroll indicator */}
-      <m.div
+      <motion.div
         className="mt-10 flex justify-center"
         variants={fadeUp}
         transition={{ delay: 0.8 }}
@@ -91,15 +91,15 @@ export function HeroSection() {
             <path d="M7 13l5 5 5-5M7 6l5 5 5-5" />
           </svg>
         </button>
-      </m.div>
-    </m.header>
+      </motion.div>
+    </motion.header>
   );
 }
 
 function PillarCard({ title, children }: { title: string; children: React.ReactNode }) {
   return (
-    <m.div
-      className="rounded-lg border border-zinc-800 bg-zinc-900/40 p-3"
+    <motion.div
+      className="glass-panel"
       variants={fadeUp}
       transition={SPRING_GENTLE}
     >
@@ -107,6 +107,6 @@ function PillarCard({ title, children }: { title: string; children: React.ReactN
         {title}
       </div>
       <p className="mt-1 text-sm leading-relaxed text-zinc-300">{children}</p>
-    </m.div>
+    </motion.div>
   );
 }

@@ -1,6 +1,6 @@
 'use client';
 
-import * as m from 'framer-motion/m';
+import { motion } from 'framer-motion';
 import { SPRING_GENTLE } from '@/lib/motion';
 import type { FinalReport } from '@/lib/types';
 
@@ -21,7 +21,7 @@ export function FinalReportPanel({
       : 'text-amber-300';
 
   return (
-    <m.section
+    <motion.section
       className="glass-strong bg-gradient-to-br from-zinc-900/80 to-zinc-950 p-6 shadow-lg"
       initial={{ opacity: 0, y: 30 }}
       animate={{ opacity: 1, y: 0 }}
@@ -57,7 +57,7 @@ export function FinalReportPanel({
       <p className="mt-5 border-t border-zinc-800 pt-4 text-sm italic text-zinc-400">
         {report.tagline || 'Fast agents are dangerous if they spend before verification. LedgerLens deliberately waits.'}
       </p>
-    </m.section>
+    </motion.section>
   );
 }
 

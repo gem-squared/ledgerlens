@@ -36,7 +36,7 @@ export function RecentActivity({ refreshTrigger, initialLimit = 5 }: RecentActiv
 
   if (!bundles) {
     return (
-      <section className="rounded-xl border border-zinc-800 bg-zinc-900/40 p-5">
+      <section className="glass-panel">
         <p className="text-xs text-zinc-500">Loading recent activity…</p>
       </section>
     );
@@ -45,7 +45,7 @@ export function RecentActivity({ refreshTrigger, initialLimit = 5 }: RecentActiv
   const visible = expanded ? bundles : bundles.slice(0, initialLimit);
 
   return (
-    <section className="rounded-xl border border-zinc-800 bg-zinc-900/40 p-5">
+    <section className="glass-panel">
       <div className="mb-3 flex items-baseline justify-between gap-3">
         <h2 className="text-xs font-semibold uppercase tracking-wider text-zinc-300">
           Recent Audit Samples

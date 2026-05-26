@@ -4,11 +4,7 @@ import { useEffect, useRef, useState } from 'react';
 import { runDealStream } from '@/lib/sse';
 import type { DealRunResult, RunMode, StepEvent } from '@/lib/types';
 import { AgentFlowTimeline } from './AgentFlowTimeline';
-import { FinalReportPanel } from './FinalReportPanel';
-import { AuditScoreCard } from './AuditScoreCard';
-import { ClaimAssessmentTable } from './ClaimAssessmentTable';
-import { SettlementCard } from './SettlementCard';
-import { EvidenceList } from './EvidenceList';
+import { RichRunResult } from './RichRunResult';
 import { VerdictReveal } from './VerdictReveal';
 
 const DEFAULT_QUERY =
@@ -110,7 +106,7 @@ export function JudgeRequestConsole({ onRunComplete }: JudgeRequestConsoleProps 
   return (
     <div className="space-y-6">
       {/* ── Console ────────────────────────────────────────────────────── */}
-      <section className="rounded-xl border border-zinc-800 bg-zinc-900/50 p-5">
+      <section className="glass-panel">
         <div className="mb-3 flex items-baseline justify-between gap-4">
           <h2 className="text-base font-semibold uppercase tracking-wider text-zinc-300">
             Judge Request Console
@@ -203,7 +199,7 @@ export function JudgeRequestConsole({ onRunComplete }: JudgeRequestConsoleProps 
 
       {/* ── Live timeline ──────────────────────────────────────────────── */}
       {runStartedAt !== null && (
-        <section className="rounded-xl border border-zinc-800 bg-zinc-900/30 p-5">
+        <section className="glass-panel">
           <AgentFlowTimeline
             mode={mode === 'replay' ? 'live' : mode}
             runStartedAt={runStartedAt}
@@ -226,39 +222,7 @@ export function JudgeRequestConsole({ onRunComplete }: JudgeRequestConsoleProps 
                 : 'blocked'
             }
           />
-          <FinalReportPanel report={result.finalReport} durationMs={result.durationMs} />
-
-          <AuditScoreCard l1={result.l1} l2={result.l2} />
-
-          <div className="grid gap-6 lg:grid-cols-2">
-            <SettlementCard settlement={result.settlement} />
-            <section className="rounded-xl border border-zinc-800 bg-zinc-900/30 p-5">
-              <h3 className="mb-3 flex items-baseline justify-between text-xs font-semibold uppercase tracking-wider text-zinc-300">
-                <span>Bright Data Evidence</span>
-                <span className="font-mono text-zinc-500">
-                  {result.evidenceReceipts?.length ?? 0} receipts
-                </span>
-              </h3>
-              <EvidenceList receipts={result.evidenceReceipts} />
-            </section>
-          </div>
-
-          {/* Technical details (claim assessments) — collapsed by default */}
-          <details className="group rounded-xl border border-zinc-800 bg-zinc-900/30 open:bg-zinc-900/40">
-            <summary className="cursor-pointer select-none list-none px-5 py-3 text-sm text-zinc-300 hover:bg-zinc-900/60">
-              <span className="inline-block w-4 text-zinc-500 transition-transform group-open:rotate-90">›</span>
-              Show claim-by-claim assessment ({result.decision?.claimAssessments?.length ?? 0} claims · canonical EEF tags)
-            </summary>
-            <div className="border-t border-zinc-800 p-5">
-              <ClaimAssessmentTable claims={result.decision?.claimAssessments ?? []} />
-            </div>
-          </details>
-
-          <div className="flex flex-wrap gap-x-6 gap-y-1 text-xs text-zinc-500">
-            <span>mode: <code>{result.mode}</code></span>
-            <span>duration: {result.durationMs} ms</span>
-            <span>bundle: <code className="break-all">{result.bundlePath}</code></span>
-          </div>
+          <RichRunResult result={result} />
         </>
       )}
     </div>

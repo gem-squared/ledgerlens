@@ -1,6 +1,6 @@
 'use client';
 
-import * as m from 'framer-motion/m';
+import { motion } from 'framer-motion';
 import { fadeUp, staggerContainer, SPRING_GENTLE } from '@/lib/motion';
 
 const STEPS = [
@@ -15,7 +15,7 @@ const STEPS = [
 
 export function HowItWorks() {
   return (
-    <m.div
+    <motion.div
       className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 xl:grid-cols-7 gap-4"
       initial="hidden"
       whileInView="visible"
@@ -23,9 +23,9 @@ export function HowItWorks() {
       variants={staggerContainer}
     >
       {STEPS.map((step, i) => (
-        <m.div
+        <motion.div
           key={step.title}
-          className="glass-panel flex flex-col items-center text-center group cursor-default"
+          className={`glass-panel flex flex-col items-center text-center group cursor-default ${i === 4 ? 'glow-indigo' : ''}`}
           variants={fadeUp}
           transition={SPRING_GENTLE}
         >
@@ -41,8 +41,8 @@ export function HowItWorks() {
               →
             </span>
           )}
-        </m.div>
+        </motion.div>
       ))}
-    </m.div>
+    </motion.div>
   );
 }

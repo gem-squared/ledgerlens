@@ -1,6 +1,6 @@
 'use client';
 
-import * as m from 'framer-motion/m';
+import { motion } from 'framer-motion';
 import type { GateResponse } from '@/lib/types';
 import { dimensionLabel, parseReasons, scoreTone } from '@/lib/reasons';
 import { AuditScoreRing } from './AuditScoreRing';
@@ -29,7 +29,7 @@ export function AuditScoreCard({ l1, l2 }: AuditScoreCardProps) {
   if (!l1 && !l2) return null;
 
   return (
-    <section className="rounded-xl border border-zinc-800 bg-zinc-900/40 p-5">
+    <section className="glass-panel">
       <div className="mb-4 flex items-baseline justify-between gap-4">
         <h2 className="text-xs font-semibold uppercase tracking-wider text-zinc-300">
           GEM² Audit Score
@@ -129,7 +129,7 @@ function GateDimensions({ title, gate }: { title: string; gate?: GateResponse })
                 <span className={`font-mono text-xs ${TONE_TEXT[tone]}`}>{d.score}</span>
               </div>
               <div className="mt-1 h-1.5 w-full overflow-hidden rounded-full bg-zinc-900">
-                <m.div
+                <motion.div
                   className={`h-full ${TONE_BG[tone]}`}
                   style={{ width: `${d.score}%`, transformOrigin: 'left' }}
                   initial={{ scaleX: 0 }}

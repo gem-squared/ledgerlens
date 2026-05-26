@@ -1,6 +1,6 @@
 'use client';
 
-import * as m from 'framer-motion/m';
+import { motion } from 'framer-motion';
 import { SPRING_BOUNCY } from '@/lib/motion';
 
 const particles = Array.from({ length: 8 }, (_, i) => {
@@ -19,7 +19,7 @@ export function VerdictReveal({ verdict }: VerdictRevealProps) {
   return (
     <div className="relative flex flex-col items-center justify-center py-10">
       {/* Radial glow */}
-      <m.div
+      <motion.div
         className="absolute w-32 h-32 rounded-full"
         style={{ background: `radial-gradient(circle, ${color}40, transparent 70%)` }}
         initial={{ scale: 0, opacity: 0 }}
@@ -29,7 +29,7 @@ export function VerdictReveal({ verdict }: VerdictRevealProps) {
 
       {/* Particles (approved only) */}
       {isApproved && particles.map((p, i) => (
-        <m.div
+        <motion.div
           key={i}
           className="absolute w-1.5 h-1.5 rounded-full bg-emerald-400"
           initial={{ x: 0, y: 0, opacity: 1, scale: 1 }}
@@ -39,17 +39,17 @@ export function VerdictReveal({ verdict }: VerdictRevealProps) {
       ))}
 
       {/* Icon */}
-      <m.div
+      <motion.div
         className="relative z-10 text-5xl"
         initial={isApproved ? { scale: 0, opacity: 0 } : { scale: 2, opacity: 0, x: 0 }}
         animate={isApproved ? { scale: 1, opacity: 1 } : { scale: 1, opacity: 1, x: [-4, 4, -3, 3, 0] }}
         transition={isApproved ? SPRING_BOUNCY : { duration: 0.4 }}
       >
         {isApproved ? '✅' : '❌'}
-      </m.div>
+      </motion.div>
 
       {/* Verdict text */}
-      <m.p
+      <motion.p
         className="relative z-10 mt-3 text-lg font-bold uppercase tracking-wider"
         style={{ color }}
         initial={{ opacity: 0, y: 10 }}
@@ -57,7 +57,7 @@ export function VerdictReveal({ verdict }: VerdictRevealProps) {
         transition={{ delay: 0.6, duration: 0.3 }}
       >
         {isApproved ? 'Payment Approved' : 'Payment Blocked'}
-      </m.p>
+      </motion.p>
     </div>
   );
 }
