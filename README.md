@@ -89,7 +89,10 @@ Requires Go ≥ 1.22, Node ≥ 20, pnpm ≥ 8.
 ```bash
 # 1) Backend (Go binary)
 cp .env.example .env
-# fill in: GEM2_API_KEY, GEMINI_API_KEY (or ANTHROPIC_API_KEY), BRIGHTDATA_API_TOKEN
+# GEM2_API_KEY is pre-filled in .env.example — a shared hackathon-judging
+# key for the gem2-tpmn-checker audit gate. You provide:
+#   - GEMINI_API_KEY  or  ANTHROPIC_API_KEY  (forwarded per-request; never stored)
+#   - BRIGHTDATA_API_TOKEN
 go mod tidy
 go run ./cmd/ledgerlens
 
