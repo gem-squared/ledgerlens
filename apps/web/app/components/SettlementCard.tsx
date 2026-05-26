@@ -31,9 +31,16 @@ export function SettlementCard({ settlement }: { settlement: SimulatedSettlement
 
 function Cell({ k, v, mono }: { k: string; v: string; mono?: boolean }) {
   return (
-    <div className="flex items-baseline gap-2">
-      <span className="w-32 shrink-0 text-xs text-zinc-500">{k}</span>
-      <span className={mono ? 'truncate font-mono text-xs' : 'text-zinc-200'}>{v}</span>
+    <div className="flex items-baseline gap-2 min-w-0">
+      <span className="w-28 shrink-0 text-xs text-zinc-500">{k}</span>
+      {/* flex-1 + min-w-0 lets `truncate` actually clip long values like
+          BLOCKED_BY_TRUST_GATE; `title` puts the full string in a hover tooltip. */}
+      <span
+        title={v}
+        className={`min-w-0 flex-1 truncate text-xs ${mono ? 'font-mono text-zinc-300' : 'text-zinc-200'}`}
+      >
+        {v}
+      </span>
     </div>
   );
 }
