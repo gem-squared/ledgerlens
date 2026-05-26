@@ -21,6 +21,9 @@ Docs/
 # Next.js static export bundles the deck into the Go binary at /pitch/.
 apps/web/public/pitch/
 
+pitch/
+pitch/*
+
 # === OS / editor ===
 .DS_Store
 .idea/
