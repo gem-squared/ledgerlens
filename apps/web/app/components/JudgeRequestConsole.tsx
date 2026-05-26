@@ -380,10 +380,17 @@ export function JudgeRequestConsole({ onRunComplete }: JudgeRequestConsoleProps 
         )}
       </section>
 
-      {/* ── Live timeline (LIVE/PRE-WARMED only; REPLAY is blocking) ───── */}
+      {/* ── Live timeline (LIVE/PRE-WARMED only; REPLAY is blocking) ─────
+          key={runStartedAt} forces a full remount on every new run so:
+          (a) the synthetic-progress requestAnimationFrame state restarts cleanly,
+          (b) the progress-bar width snaps to 0% instead of CSS-transitioning
+              from the previous run's 100% over 200ms, and
+          (c) per-step state derived in the component re-derives from the
+              now-empty events array. */}
       {mode !== 'replay' && runStartedAt !== null && (
         <section className="rounded-xl border border-zinc-800 bg-zinc-900/30 p-5">
           <AgentFlowTimeline
+            key={runStartedAt}
             mode={mode}
             runStartedAt={runStartedAt}
             events={events}
