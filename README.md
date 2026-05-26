@@ -2,6 +2,8 @@
 
 > **No grounded claim, no payment.**
 
+![LedgerLens — autonomous deal with trust-gated x402 settlement](./assets/demo.gif)
+
 LedgerLens is an **x402-native Agent-to-Agent Payments product** with a **Bright Data-powered web evidence layer** and a **GEM² Trust Gate** before settlement.
 
 Buyer agents need fresh web data. Seller agents claim they have it. LedgerLens uses Bright Data to verify those claims against live public web evidence, then asks GEM² to audit the claims through L1 P-check + L2 O-check before any payment is allowed. Only if the claim is sufficiently grounded does the system permit x402 settlement.
