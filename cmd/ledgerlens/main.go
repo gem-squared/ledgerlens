@@ -70,6 +70,7 @@ func main() {
 	// also writes to.
 	var serpClient *brightdata.SERPClient
 	var unlockerClient *brightdata.UnlockerClient
+	var browserClient *brightdata.BrowserClient
 	if cfg.BrightDataAPIToken != "" {
 		bdStore, err := brightdata.NewReceiptStore("artifacts/fetch_receipts")
 		if err != nil {
@@ -81,6 +82,16 @@ func main() {
 		if z := os.Getenv("BRIGHTDATA_UNLOCKER_ZONE"); z != "" {
 			unlockerClient = brightdata.NewUnlockerClient(cfg.BrightDataAPIToken, z, bdStore)
 		}
+		// Browser API authenticates via its embedded-credentials HTTPS URL,
+		// not the API token — but in practice all three are set together.
+		if u := os.Getenv("BRIGHTDATA_BROWSER_HTTPS_URL"); u != "" {
+			bc, berr := brightdata.NewBrowserClient(u, bdStore)
+			if berr != nil {
+				log.Printf("ledgerlens: browser client init failed: %v (skipping Browser)", berr)
+			} else {
+				browserClient = bc
+			}
+		}
 	}
 
 	srv := &api.Server{
@@ -90,6 +101,7 @@ func main() {
 		BundleStore:     bundles,
 		SERP:            serpClient,
 		Unlocker:        unlockerClient,
+		Browser:         browserClient,
 		AnthropicAPIKey: cfg.AnthropicAPIKey,
 	}
 

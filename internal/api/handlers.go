@@ -22,6 +22,7 @@ type Server struct {
 	BundleStore     *paymentgate.BundleStore
 	SERP            *brightdata.SERPClient     // Slice 1 (Judge Request Mode) — live SERP search
 	Unlocker        *brightdata.UnlockerClient // Slice 1 — live Unlocker fetch
+	Browser         *brightdata.BrowserClient  // Slice 1 — live Browser API render (optional; nil → step is skipped)
 	AnthropicAPIKey string                     // Slice 1 — intent + offer synthesis LLM calls
 }
 

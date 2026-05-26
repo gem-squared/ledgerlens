@@ -224,6 +224,30 @@ func (s *Server) runDealPipeline(
 	)
 	add(fmt.Sprintf("Bright Data collected %d evidence receipt(s).", len(receipts)))
 
+	// Step 4.5 — Bright Data Browser API renders the top candidate URL.
+	// JS-heavy pages (status dashboards, SPA-rendered pricing tables) are
+	// often invisible to Unlocker's raw fetch but render correctly through
+	// the headless-Chrome session. Optional: if Browser is not configured
+	// (s.Browser == nil) or the fetch fails, the deal still proceeds with
+	// SERP + Unlocker evidence — Browser is additive, never blocking.
+	if s.Browser != nil && len(urls) > 0 {
+		emitWrap("brightdata_browser", "running",
+			"Bright Data Browser API rendering JavaScript-heavy page…", nil)
+		bev, berr := s.Browser.FetchPage(ctx, urls[0])
+		if berr != nil {
+			emitWrap("brightdata_browser", "skipped",
+				"Browser render unavailable for this URL — continuing with Unlocker evidence.",
+				map[string]any{"reason": berr.Error()})
+		} else {
+			receipts = append(receipts, bev)
+			emitWrap("brightdata_browser", "passed",
+				fmt.Sprintf("Bright Data Browser rendered the live page (%d evidence receipts total).", len(receipts)),
+				map[string]any{"url": urls[0], "receiptCount": len(receipts)},
+			)
+			add("Bright Data Browser rendered the live page.")
+		}
+	}
+
 	// Step 5 — Seller Offer Agent
 	emitWrap("seller_offer", "running", "Seller Offer Agent constructing candidate deal from evidence…", nil)
 	offer, err := agent.Synthesize(ctx, intent, receipts, s.AnthropicAPIKey)
