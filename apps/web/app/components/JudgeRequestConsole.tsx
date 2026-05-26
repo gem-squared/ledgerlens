@@ -61,6 +61,15 @@ export function JudgeRequestConsole({ onRunComplete }: JudgeRequestConsoleProps 
 
   const abortRef = useRef<AbortController | null>(null);
 
+  // Generation token — incremented on every Run *and* every Reset. SSE
+  // callbacks from a previous stream capture their generation in closure
+  // and short-circuit if they fire after the user has moved on. Aborting
+  // the AbortController stops new fetch reads but buffered SSE data
+  // already in flight can still drive a few callback invocations before
+  // the abort signal propagates — those would otherwise repopulate
+  // freshly-cleared state with stale events.
+  const generationRef = useRef(0);
+
   // Force a re-render every 250ms while running, so the elapsed-time
   // display + heartbeat detection stay live even with no incoming events.
   const [, forceTick] = useState(0);
@@ -138,6 +147,12 @@ export function JudgeRequestConsole({ onRunComplete }: JudgeRequestConsoleProps 
 
   function onRunLive() {
     if (running) return;
+    // Abort any lingering previous stream BEFORE bumping the generation —
+    // otherwise pending callbacks from the old stream would still see the
+    // new gen and look "fresh" until their abort signal lands.
+    abortRef.current?.abort();
+    generationRef.current += 1;
+    const myGen = generationRef.current;
     reset();
     setRunning(true);
     setRunStartedAt(Date.now());
@@ -150,6 +165,7 @@ export function JudgeRequestConsole({ onRunComplete }: JudgeRequestConsoleProps 
       },
       {
         onStep: (e) => {
+          if (generationRef.current !== myGen) return; // stale callback
           setEvents((prev) => [...prev, e]);
           setLastEventAt(Date.now());
           if (e.status === 'rejected') {
@@ -158,11 +174,13 @@ export function JudgeRequestConsole({ onRunComplete }: JudgeRequestConsoleProps 
           }
         },
         onResult: (r) => {
+          if (generationRef.current !== myGen) return; // stale callback
           setResult(r);
           setRunning(false);
           onRunComplete?.();
         },
         onError: (err) => {
+          if (generationRef.current !== myGen) return; // stale callback
           if (err.error?.includes('off_domain')) {
             setPoliteReject(
               'This demo is scoped to autonomous web-data purchase requests. Try the default NYSE/NASDAQ market data request.',
@@ -173,6 +191,7 @@ export function JudgeRequestConsole({ onRunComplete }: JudgeRequestConsoleProps 
           setRunning(false);
         },
         onClose: () => {
+          if (generationRef.current !== myGen) return; // stale callback
           setRunning(false);
         },
       },
@@ -181,37 +200,46 @@ export function JudgeRequestConsole({ onRunComplete }: JudgeRequestConsoleProps 
 
   async function onRunReplay(caseId: string) {
     if (running) return;
+    abortRef.current?.abort();
+    generationRef.current += 1;
+    const myGen = generationRef.current;
     reset();
     setRunning(true);
     setRunStartedAt(Date.now());
     try {
       const r = await runCase(caseId);
+      if (generationRef.current !== myGen) return;
       setResult(r);
       onRunComplete?.();
     } catch (e: unknown) {
+      if (generationRef.current !== myGen) return;
       setError(e instanceof Error ? e.message : String(e));
     } finally {
-      setRunning(false);
+      if (generationRef.current === myGen) setRunning(false);
     }
   }
 
   function onCancel() {
     abortRef.current?.abort();
+    generationRef.current += 1;
     setRunning(false);
   }
 
   function onReset() {
-    // Reset clears the *result* surface (timeline + final report + error
-    // banners), NOT the user's query. Previously this also forced
-    // setQuery(DEFAULT_QUERY) which silently overwrote whatever the
-    // judge typed or picked from the sample dropdown — a confusing UX,
-    // especially because DEFAULT_QUERY happens to equal the APPROVED
-    // NYSE sample, so the textarea visually looked unchanged while a
-    // re-run actually used different text under the hood.
-    // Also defensively abort any lingering SSE controller so a stalled
-    // previous-run reader can't keep mutating state after Reset.
+    // Reset clears the result surface (timeline + final report + error
+    // banners), NOT the user's query. setQuery(DEFAULT_QUERY) used to be
+    // here but silently overwrote whatever the judge typed or picked.
+    //
+    // Bumping the generation token invalidates any in-flight SSE
+    // callbacks from a previous stream — aborting the controller stops
+    // *new* fetch reads but buffered SSE data already in flight can
+    // still drive a few callback invocations before the abort signal
+    // propagates. Those would repopulate freshly-cleared state with
+    // stale events. After this bump, every late callback short-circuits
+    // because `generationRef.current !== myGen`.
     abortRef.current?.abort();
     abortRef.current = null;
+    generationRef.current += 1;
     reset();
     setRunStartedAt(null);
   }
