@@ -201,9 +201,19 @@ export function JudgeRequestConsole({ onRunComplete }: JudgeRequestConsoleProps 
   }
 
   function onReset() {
+    // Reset clears the *result* surface (timeline + final report + error
+    // banners), NOT the user's query. Previously this also forced
+    // setQuery(DEFAULT_QUERY) which silently overwrote whatever the
+    // judge typed or picked from the sample dropdown — a confusing UX,
+    // especially because DEFAULT_QUERY happens to equal the APPROVED
+    // NYSE sample, so the textarea visually looked unchanged while a
+    // re-run actually used different text under the hood.
+    // Also defensively abort any lingering SSE controller so a stalled
+    // previous-run reader can't keep mutating state after Reset.
+    abortRef.current?.abort();
+    abortRef.current = null;
     reset();
     setRunStartedAt(null);
-    setQuery(DEFAULT_QUERY);
   }
 
   return (
