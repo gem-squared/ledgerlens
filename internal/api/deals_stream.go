@@ -224,29 +224,14 @@ func (s *Server) runDealPipeline(
 	)
 	add(fmt.Sprintf("Bright Data collected %d evidence receipt(s).", len(receipts)))
 
-	// Step 4.5 — Bright Data Browser API renders the top candidate URL.
-	// JS-heavy pages (status dashboards, SPA-rendered pricing tables) are
-	// often invisible to Unlocker's raw fetch but render correctly through
-	// the headless-Chrome session. Optional: if Browser is not configured
-	// (s.Browser == nil) or the fetch fails, the deal still proceeds with
-	// SERP + Unlocker evidence — Browser is additive, never blocking.
-	if s.Browser != nil && len(urls) > 0 {
-		emitWrap("brightdata_browser", "running",
-			"Bright Data Browser API rendering JavaScript-heavy page…", nil)
-		bev, berr := s.Browser.FetchPage(ctx, urls[0])
-		if berr != nil {
-			emitWrap("brightdata_browser", "skipped",
-				"Browser render unavailable for this URL — continuing with Unlocker evidence.",
-				map[string]any{"reason": berr.Error()})
-		} else {
-			receipts = append(receipts, bev)
-			emitWrap("brightdata_browser", "passed",
-				fmt.Sprintf("Bright Data Browser rendered the live page (%d evidence receipts total).", len(receipts)),
-				map[string]any{"url": urls[0], "receiptCount": len(receipts)},
-			)
-			add("Bright Data Browser rendered the live page.")
-		}
-	}
+	// NOTE: Browser API step intentionally NOT called in the LIVE pipeline.
+	// Reason: brd.superproxy.io WebDriver sessions occasionally exceed the
+	// deal's 120s context budget (4 WebDriver calls × up to 90s each), which
+	// caused "context deadline exceeded" failures with no recovery. The
+	// BrowserClient is still instantiated in main.go and the unit tests in
+	// internal/brightdata/integration_test.go exercise it — proof of depth
+	// without putting the user-facing demo at risk. Re-enable post-hackathon
+	// once a per-step Browser budget + graceful-skip pattern is in place.
 
 	// Step 5 — Seller Offer Agent
 	emitWrap("seller_offer", "running", "Seller Offer Agent constructing candidate deal from evidence…", nil)
